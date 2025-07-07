@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "180177377861",
+    "project_id": "wordlegame-59ecf",
+    "storage_bucket": "wordlegame-59ecf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180177377861:android:a309a338005f19ba1aa12c",
+        "android_client_info": {
+          "package_name": "com.example.gmae_wordle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "180177377861-7df1qdl1jkulian63bn51faolo45ga6j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gmae_wordle",
+            "certificate_hash": "1572734f142a4d0ade2624a1b27181bc8a75ccbc"
+          }
+        },
+        {
+          "client_id": "180177377861-th54g1m057ic8ju79nue1qpkhnpr17oo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBS2mAcLovwlkwWWij8AccfcksVsXTJfYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "180177377861-th54g1m057ic8ju79nue1qpkhnpr17oo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
