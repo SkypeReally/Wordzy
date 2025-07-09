@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 AppBar buildWordleAppBar({
   required BuildContext context,
-  required String title,
+  required Widget title,
   VoidCallback? onBack,
   Widget? leading,
   List<Widget>? actions,
@@ -10,7 +10,7 @@ AppBar buildWordleAppBar({
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
   final Color appBarBg = isDark
-      ? const Color(0xFF433F49) // slightly cleaner hex
+      ? const Color(0xFF433F49)
       : const Color(0xFFC0BBBD);
 
   final Color appBarFg = isDark ? Colors.white : Colors.black;
@@ -25,10 +25,7 @@ AppBar buildWordleAppBar({
         (onBack != null
             ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack)
             : null),
-    title: Text(
-      title.toUpperCase(),
-      style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2),
-    ),
+    title: title,
     actions: actions,
   );
 }

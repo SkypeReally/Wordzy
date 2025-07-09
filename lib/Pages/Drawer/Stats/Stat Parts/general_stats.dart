@@ -18,7 +18,7 @@ class GeneralStatsView extends StatelessWidget {
     final wins = stats.totalWins;
     final winPercent = stats.winPercentage;
     final streak = stats.currentStreak;
-    final best = stats.bestStreak;
+    final best = stats.maxStreak;
     final distribution = stats.guessDistribution;
 
     return Center(

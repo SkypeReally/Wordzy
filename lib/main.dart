@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:gmae_wordle/Provider/streak_freeze.dart';
 import 'package:provider/provider.dart';
 
 import 'package:gmae_wordle/Authentication/Core/auth_wrapper.dart';
@@ -28,6 +29,8 @@ void main() async {
   final settingsProvider = SettingsProvider();
   await settingsProvider.loadSettings();
 
+  // ✅ Load persisted value
+
   await WordListService.loadWordList();
   await DailyWordService.loadDailyWords();
 
@@ -38,6 +41,10 @@ void main() async {
         ChangeNotifierProvider(create: (_) => WordLengthProvider()),
         ChangeNotifierProvider(create: (_) => StatsProvider()),
         ChangeNotifierProvider(create: (_) => DailyStatsProvider()),
+
+        ChangeNotifierProvider<StreakFreezeProvider>.value(
+          value: StreakFreezeProvider(),
+        ),
         ChangeNotifierProvider.value(value: settingsProvider),
       ],
       child: const MyApp(),

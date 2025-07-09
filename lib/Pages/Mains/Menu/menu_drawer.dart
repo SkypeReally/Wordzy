@@ -1,6 +1,10 @@
-// lib/Pages/Mains/Menu/menu_drawer.dart
-
 import 'package:flutter/material.dart';
+import 'package:gmae_wordle/Pages/Drawer/Hard%20Mode/hard_mode.dart';
+import 'package:gmae_wordle/Pages/Drawer/Hints/hint_page.dart';
+import 'package:gmae_wordle/Pages/Drawer/Stats/Archive/archive_page.dart';
+import 'package:gmae_wordle/Pages/Drawer/Stats/Archive/definition_page.dart';
+import 'package:gmae_wordle/Pages/Drawer/Streak/streak_page.dart';
+import 'package:gmae_wordle/Pages/Drawer/Support/supprt_page.dart';
 import 'package:provider/provider.dart';
 import 'package:gmae_wordle/Authentication/Core/firebase_auth.dart';
 import 'package:gmae_wordle/Instances/page_transition.dart';
@@ -27,7 +31,7 @@ class MenuDrawer extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // Theme Toggle (top right)
+                // Theme Toggle
                 Positioned(
                   top: 23,
                   right: 32,
@@ -41,12 +45,10 @@ class MenuDrawer extends StatelessWidget {
                     tooltip: 'Toggle Theme',
                     onPressed: () {
                       themeProvider.toggleTheme();
-                      Navigator.of(context).pop(); // Close drawer
+                      Navigator.of(context).pop();
                     },
                   ),
                 ),
-
-                // Main Profile Row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -71,61 +73,63 @@ class MenuDrawer extends StatelessWidget {
             ),
           ),
 
+          // 🧠 Secondary Features
+          _buildDrawerItem(
+            icon: Icons.tips_and_updates,
+            label: 'Hints',
+            onTap: () => _navigate(context, const HintsPage()),
+          ),
           _buildDrawerItem(
             icon: Icons.bar_chart,
             label: 'Stats',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(context, createSlideRoute(const StatsPage()));
-            },
+            onTap: () => _navigate(context, const StatsPage()),
           ),
 
           _buildDrawerItem(
-            icon: Icons.settings,
-            label: 'Settings',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(context, createSlideRoute(const SettingsPage()));
-            },
+            icon: Icons.security,
+            label: 'Streak Freeze',
+            onTap: () => _navigate(context, const StreakPage()),
+          ),
+          _buildDrawerItem(
+            icon: Icons.list_alt,
+            label: 'Archive',
+            onTap: () => _navigate(context, const ArchivePage()),
+          ),
+          _buildDrawerItem(
+            icon: Icons.menu_book,
+            label: 'Word Definitions',
+            onTap: () =>
+                _navigate(context, const DefinitionPage(word: 'HELLO')),
           ),
 
+          _buildDrawerItem(
+            icon: Icons.vpn_key,
+            label: 'Hard Mode',
+            onTap: () => _navigate(context, const HardModePage()),
+          ),
+
+          const Divider(),
+
+          // ⚙️ Settings and Support
+          _buildDrawerItem(
+            icon: Icons.settings,
+            label: 'Settings',
+            onTap: () => _navigate(context, const SettingsPage()),
+          ),
+          _buildDrawerItem(
+            icon: Icons.support_agent,
+            label: 'Support',
+            onTap: () => _navigate(context, const SupportPage()),
+          ),
           _buildDrawerItem(
             icon: Icons.logout,
             label: 'Log Out',
             textColor: Colors.red,
             iconColor: Colors.red,
-            onTap: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Log Out"),
-                  content: const Text("Are you sure you want to log out?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text("Cancel"),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text("Log Out"),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirm == true) {
-                await AuthService().signOut(context);
-                if (context.mounted) {
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil('/', (_) => false);
-                }
-              }
-            },
+            onTap: () => _handleLogout(context),
           ),
 
           const Spacer(),
-
           const Padding(
             padding: EdgeInsets.only(bottom: 16.0),
             child: Text("v1.5 • Wordle Team", style: TextStyle(fontSize: 12)),
@@ -133,6 +137,38 @@ class MenuDrawer extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _navigate(BuildContext context, Widget page) {
+    Navigator.pop(context);
+    Navigator.push(context, createSlideRoute(page));
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Log Out"),
+        content: const Text("Are you sure you want to log out?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Log Out"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await AuthService().signOut(context);
+      if (context.mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+      }
+    }
   }
 
   Widget _buildDrawerItem({

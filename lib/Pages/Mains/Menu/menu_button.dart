@@ -1,21 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:gmae_wordle/Pages/Mains/Daily%20Word/Main/dailyword_page.dart';
+// import 'package:provider/provider.dart';
 import 'package:gmae_wordle/Pages/Mains/Play%20Game/Main/gamepage.dart';
 import 'package:gmae_wordle/Pages/Mains/Word%20Lenth/wordlength_page.dart';
 import 'package:gmae_wordle/Util/debug_util.dart';
-import 'package:gmae_wordle/Provider/setting_provider.dart';
+// import 'package:gmae_wordle/Provider/setting_provider.dart';
 import 'package:gmae_wordle/Instances/page_transition.dart';
-
-enum TransitionType { slide, fade }
 
 class MenuButtons extends StatelessWidget {
   const MenuButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsProvider>();
+    // final settings = context.watch<SettingsProvider>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -26,22 +23,12 @@ class MenuButtons extends StatelessWidget {
           label: 'Play Game',
           onTap: () => Navigator.of(context).push(
             createSlideRoute(
-              PlayGamePage(
-                wordLength: settings.defaultWordLength,
-                isDailyMode: false,
-              ),
+              const PlayGamePage(isDailyMode: false),
               useDelay: true,
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        _buildMenuButton(
-          context,
-          label: 'Daily Word',
-          onTap: () => Navigator.of(
-            context,
-          ).push(createSlideRoute(const DailyWordPage())),
-        ),
+
         const SizedBox(height: 16),
         _buildMenuButton(
           context,

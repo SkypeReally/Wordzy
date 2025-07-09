@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StatsProvider with ChangeNotifier {
@@ -10,7 +10,7 @@ class StatsProvider with ChangeNotifier {
   int totalWins = 0;
   double winPercentage = 0.0;
   int currentStreak = 0;
-  int bestStreak = 0;
+  int _maxStreak = 0;
   List<int> guessDistribution = List.filled(6, 0);
 
   // 🟡 Daily Stats
@@ -18,14 +18,18 @@ class StatsProvider with ChangeNotifier {
   int dailyWins = 0;
   double dailyWinPercentage = 0.0;
   int dailyCurrentStreak = 0;
-  int dailyBestStreak = 0;
+  int _dailyMaxStreak = 0;
   List<int> dailyGuessDistribution = List.filled(6, 0);
 
+  // 🔁 Firestore listener
   StreamSubscription<DocumentSnapshot>? _statsSubscription;
 
   StatsProvider() {
     _loadStats();
   }
+
+  int get maxStreak => _maxStreak;
+  int get dailyMaxStreak => _dailyMaxStreak;
 
   Future<void> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
@@ -34,12 +38,10 @@ class StatsProvider with ChangeNotifier {
     totalGamesPlayed = prefs.getInt('totalGames') ?? 0;
     totalWins = prefs.getInt('totalWins') ?? 0;
     currentStreak = prefs.getInt('currentStreak') ?? 0;
-    bestStreak = prefs.getInt('bestStreak') ?? 0;
-
+    _maxStreak = prefs.getInt('bestStreak') ?? 0;
     winPercentage = totalGamesPlayed > 0
         ? (totalWins / totalGamesPlayed) * 100
         : 0.0;
-
     for (int i = 0; i < 6; i++) {
       guessDistribution[i] = prefs.getInt('guessDist_$i') ?? 0;
     }
@@ -48,28 +50,30 @@ class StatsProvider with ChangeNotifier {
     dailyGamesPlayed = prefs.getInt('daily_totalGames') ?? 0;
     dailyWins = prefs.getInt('daily_totalWins') ?? 0;
     dailyCurrentStreak = prefs.getInt('daily_currentStreak') ?? 0;
-    dailyBestStreak = prefs.getInt('daily_bestStreak') ?? 0;
-
+    _dailyMaxStreak = prefs.getInt('daily_bestStreak') ?? 0;
     dailyWinPercentage = dailyGamesPlayed > 0
         ? (dailyWins / dailyGamesPlayed) * 100
         : 0.0;
-
     for (int i = 0; i < 6; i++) {
       dailyGuessDistribution[i] = prefs.getInt('daily_guessDist_$i') ?? 0;
     }
 
     notifyListeners();
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && !user.isAnonymous) {
+      listenToCloudStats();
+    }
   }
 
   Future<void> saveStatsToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-
     // 🔵 General
     await prefs.setInt('totalGames', totalGamesPlayed);
     await prefs.setInt('totalWins', totalWins);
     await prefs.setInt('currentStreak', currentStreak);
-    await prefs.setInt('bestStreak', bestStreak);
-    for (int i = 0; i < guessDistribution.length; i++) {
+    await prefs.setInt('bestStreak', _maxStreak);
+    for (int i = 0; i < 6; i++) {
       await prefs.setInt('guessDist_$i', guessDistribution[i]);
     }
 
@@ -77,8 +81,8 @@ class StatsProvider with ChangeNotifier {
     await prefs.setInt('daily_totalGames', dailyGamesPlayed);
     await prefs.setInt('daily_totalWins', dailyWins);
     await prefs.setInt('daily_currentStreak', dailyCurrentStreak);
-    await prefs.setInt('daily_bestStreak', dailyBestStreak);
-    for (int i = 0; i < dailyGuessDistribution.length; i++) {
+    await prefs.setInt('daily_bestStreak', _dailyMaxStreak);
+    for (int i = 0; i < 6; i++) {
       await prefs.setInt('daily_guessDist_$i', dailyGuessDistribution[i]);
     }
   }
@@ -91,7 +95,7 @@ class StatsProvider with ChangeNotifier {
     if (won) {
       totalWins++;
       currentStreak++;
-      if (currentStreak > bestStreak) bestStreak = currentStreak;
+      if (currentStreak > _maxStreak) _maxStreak = currentStreak;
       if (guessCount >= 1 && guessCount <= 6) {
         guessDistribution[guessCount - 1]++;
       }
@@ -116,8 +120,8 @@ class StatsProvider with ChangeNotifier {
     if (won) {
       dailyWins++;
       dailyCurrentStreak++;
-      if (dailyCurrentStreak > dailyBestStreak) {
-        dailyBestStreak = dailyCurrentStreak;
+      if (dailyCurrentStreak > _dailyMaxStreak) {
+        _dailyMaxStreak = dailyCurrentStreak;
       }
       if (guessIndex >= 0 && guessIndex < 6) {
         dailyGuessDistribution[guessIndex]++;
@@ -140,7 +144,7 @@ class StatsProvider with ChangeNotifier {
     totalWins = 0;
     winPercentage = 0;
     currentStreak = 0;
-    bestStreak = 0;
+    _maxStreak = 0;
     guessDistribution = List.filled(6, 0);
 
     notifyListeners();
@@ -154,19 +158,21 @@ class StatsProvider with ChangeNotifier {
       await prefs.remove('guessDist_$i');
     }
 
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'stats': {
-          'totalGamesPlayed': 0,
-          'totalWins': 0,
-          'winPercentage': 0,
-          'currentStreak': 0,
-          'bestStreak': 0,
-          'guessDistribution': List.filled(6, 0),
-          'lastUpdated': FieldValue.serverTimestamp(),
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && !user.isAnonymous) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {
+          'stats': {
+            'totalGamesPlayed': 0,
+            'totalWins': 0,
+            'winPercentage': 0,
+            'currentStreak': 0,
+            'bestStreak': 0,
+            'guessDistribution': List.filled(6, 0),
+            'lastUpdated': FieldValue.serverTimestamp(),
+          },
         },
-      });
+      );
     }
   }
 
@@ -175,7 +181,7 @@ class StatsProvider with ChangeNotifier {
     dailyWins = 0;
     dailyWinPercentage = 0;
     dailyCurrentStreak = 0;
-    dailyBestStreak = 0;
+    _dailyMaxStreak = 0;
     dailyGuessDistribution = List.filled(6, 0);
 
     notifyListeners();
@@ -189,29 +195,31 @@ class StatsProvider with ChangeNotifier {
       await prefs.remove('daily_guessDist_$i');
     }
 
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'dailyStats': {
-          'dailyGamesPlayed': 0,
-          'dailyWins': 0,
-          'dailyWinPercentage': 0,
-          'dailyCurrentStreak': 0,
-          'dailyBestStreak': 0,
-          'dailyGuessDistribution': List.filled(6, 0),
-          'lastUpdated': FieldValue.serverTimestamp(),
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && !user.isAnonymous) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {
+          'dailyStats': {
+            'dailyGamesPlayed': 0,
+            'dailyWins': 0,
+            'dailyWinPercentage': 0,
+            'dailyCurrentStreak': 0,
+            'dailyBestStreak': 0,
+            'dailyGuessDistribution': List.filled(6, 0),
+            'lastUpdated': FieldValue.serverTimestamp(),
+          },
         },
-      });
+      );
     }
   }
 
   Future<void> loadStatsFromCloud() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) return;
 
     final doc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(uid)
+        .doc(user.uid)
         .get();
     final cloudStats = doc.data()?['stats'];
     final dailyStats = doc.data()?['dailyStats'];
@@ -221,7 +229,7 @@ class StatsProvider with ChangeNotifier {
       totalWins = cloudStats['totalWins'] ?? 0;
       winPercentage = (cloudStats['winPercentage'] ?? 0).toDouble();
       currentStreak = cloudStats['currentStreak'] ?? 0;
-      bestStreak = cloudStats['bestStreak'] ?? 0;
+      _maxStreak = cloudStats['bestStreak'] ?? 0;
       guessDistribution = List<int>.from(
         cloudStats['guessDistribution'] ?? List.filled(6, 0),
       );
@@ -232,7 +240,7 @@ class StatsProvider with ChangeNotifier {
       dailyWins = dailyStats['dailyWins'] ?? 0;
       dailyWinPercentage = (dailyStats['dailyWinPercentage'] ?? 0).toDouble();
       dailyCurrentStreak = dailyStats['dailyCurrentStreak'] ?? 0;
-      dailyBestStreak = dailyStats['dailyBestStreak'] ?? 0;
+      _dailyMaxStreak = dailyStats['dailyBestStreak'] ?? 0;
       dailyGuessDistribution = List<int>.from(
         dailyStats['dailyGuessDistribution'] ?? List.filled(6, 0),
       );
@@ -242,78 +250,106 @@ class StatsProvider with ChangeNotifier {
   }
 
   void listenToCloudStats() {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) {
+      debugPrint(
+        "⚠️ [StatsProvider] Listener not started — user null or anonymous.",
+      );
+      return;
+    }
 
-    _statsSubscription?.cancel(); // Cancel previous if any
+    _statsSubscription?.cancel();
 
     _statsSubscription = FirebaseFirestore.instance
         .collection('users')
-        .doc(uid)
+        .doc(user.uid)
         .snapshots()
-        .listen((doc) {
-          final cloudStats = doc.data()?['stats'];
-          final dailyStats = doc.data()?['dailyStats'];
+        .listen(
+          (doc) {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null || currentUser.isAnonymous) {
+              debugPrint(
+                "⛔ [StatsProvider] User signed out during listener event — skipping update.",
+              );
+              return;
+            }
 
-          if (cloudStats != null) {
-            totalGamesPlayed = cloudStats['totalGamesPlayed'] ?? 0;
-            totalWins = cloudStats['totalWins'] ?? 0;
-            winPercentage = (cloudStats['winPercentage'] ?? 0).toDouble();
-            currentStreak = cloudStats['currentStreak'] ?? 0;
-            bestStreak = cloudStats['bestStreak'] ?? 0;
-            guessDistribution = List<int>.from(
-              cloudStats['guessDistribution'] ?? List.filled(6, 0),
-            );
-          }
+            final data = doc.data();
+            if (data == null) return;
 
-          if (dailyStats != null) {
-            dailyGamesPlayed = dailyStats['dailyGamesPlayed'] ?? 0;
-            dailyWins = dailyStats['dailyWins'] ?? 0;
-            dailyWinPercentage = (dailyStats['dailyWinPercentage'] ?? 0)
-                .toDouble();
-            dailyCurrentStreak = dailyStats['dailyCurrentStreak'] ?? 0;
-            dailyBestStreak = dailyStats['dailyBestStreak'] ?? 0;
-            dailyGuessDistribution = List<int>.from(
-              dailyStats['dailyGuessDistribution'] ?? List.filled(6, 0),
-            );
-          }
+            final cloudStats = data['stats'];
+            final dailyStats = data['dailyStats'];
 
-          notifyListeners();
-        });
+            if (cloudStats is Map<String, dynamic>) {
+              totalGamesPlayed = cloudStats['totalGamesPlayed'] ?? 0;
+              totalWins = cloudStats['totalWins'] ?? 0;
+              winPercentage = (cloudStats['winPercentage'] ?? 0).toDouble();
+              currentStreak = cloudStats['currentStreak'] ?? 0;
+              _maxStreak = cloudStats['bestStreak'] ?? 0;
+              final dist = cloudStats['guessDistribution'];
+              if (dist is List) {
+                guessDistribution = List<int>.from(dist.map((e) => e ?? 0));
+              }
+            }
+
+            if (dailyStats is Map<String, dynamic>) {
+              dailyGamesPlayed = dailyStats['dailyGamesPlayed'] ?? 0;
+              dailyWins = dailyStats['dailyWins'] ?? 0;
+              dailyWinPercentage = (dailyStats['dailyWinPercentage'] ?? 0)
+                  .toDouble();
+              dailyCurrentStreak = dailyStats['dailyCurrentStreak'] ?? 0;
+              _dailyMaxStreak = dailyStats['dailyBestStreak'] ?? 0;
+              final dailyDist = dailyStats['dailyGuessDistribution'];
+              if (dailyDist is List) {
+                dailyGuessDistribution = List<int>.from(
+                  dailyDist.map((e) => e ?? 0),
+                );
+              }
+            }
+
+            notifyListeners();
+          },
+          onError: (error) {
+            debugPrint("🔥 [StatsProvider] Firestore listener error: $error");
+          },
+          cancelOnError: true,
+        );
   }
 
-  void cancelCloudListener() {
-    _statsSubscription?.cancel();
+  Future<void> cancelCloudListener() async {
+    await _statsSubscription?.cancel();
     _statsSubscription = null;
   }
 
   Future<void> saveStatsToCloud() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) return;
 
-    final stats = {
-      'totalGamesPlayed': totalGamesPlayed,
-      'totalWins': totalWins,
-      'winPercentage': winPercentage,
-      'currentStreak': currentStreak,
-      'bestStreak': bestStreak,
-      'guessDistribution': guessDistribution,
-      'lastUpdated': FieldValue.serverTimestamp(),
-    };
-
-    final dailyStats = {
-      'dailyGamesPlayed': dailyGamesPlayed,
-      'dailyWins': dailyWins,
-      'dailyWinPercentage': dailyWinPercentage,
-      'dailyCurrentStreak': dailyCurrentStreak,
-      'dailyBestStreak': dailyBestStreak,
-      'dailyGuessDistribution': dailyGuessDistribution,
-      'lastUpdated': FieldValue.serverTimestamp(),
-    };
-
-    await FirebaseFirestore.instance.collection('users').doc(uid).set({
-      'stats': stats,
-      'dailyStats': dailyStats,
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'stats': {
+        'totalGamesPlayed': totalGamesPlayed,
+        'totalWins': totalWins,
+        'winPercentage': winPercentage,
+        'currentStreak': currentStreak,
+        'bestStreak': _maxStreak,
+        'guessDistribution': guessDistribution,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      },
+      'dailyStats': {
+        'dailyGamesPlayed': dailyGamesPlayed,
+        'dailyWins': dailyWins,
+        'dailyWinPercentage': dailyWinPercentage,
+        'dailyCurrentStreak': dailyCurrentStreak,
+        'dailyBestStreak': _dailyMaxStreak,
+        'dailyGuessDistribution': dailyGuessDistribution,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      },
     }, SetOptions(merge: true));
+  }
+
+  @override
+  void dispose() {
+    cancelCloudListener();
+    super.dispose();
   }
 }

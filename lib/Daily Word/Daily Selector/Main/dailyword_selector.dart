@@ -44,12 +44,20 @@ class _DailyWordLengthSelectorPageState
       showAlreadyPlayedDialog(context);
     } else {
       final today = DateTime.now();
+
+      // ✅ Load words before accessing
+      await DailyWordService.loadDailyWords();
+
       final word = DailyWordService.getDailyWord(length, today);
+
+      if (word.isEmpty) {
+        debugPrint("🚫 No daily word for length $length on $today");
+        return;
+      }
 
       await Navigator.of(context).push(
         createSlideRoute(
           PlayGamePage(
-            wordLength: length,
             fixedWord: word,
             isDailyMode: true,
             dailyWordLength: length,
@@ -57,7 +65,6 @@ class _DailyWordLengthSelectorPageState
         ),
       );
 
-      // 🔁 Refresh UI on return
       await _checkPlayedStatus();
     }
   }

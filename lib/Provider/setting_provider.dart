@@ -10,6 +10,9 @@ class SettingsProvider extends ChangeNotifier {
   bool isPhysicalKeyboardEnabled = true;
   bool isTileAnimationEnabled = true;
   bool autoStartDaily = false;
+  bool hardMode = false;
+  bool hintsEnabled = false;
+
   int defaultWordLength = 5;
 
   String _displayName = "Player";
@@ -17,7 +20,6 @@ class SettingsProvider extends ChangeNotifier {
 
   bool _applyingFromCloud = false;
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>>? _settingsStream;
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
   _settingsSubscription;
 
@@ -26,12 +28,14 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
+    hintsEnabled = prefs.getBool('hintsEnabled') ?? false;
     isHapticEnabled = prefs.getBool('isHapticEnabled') ?? true;
     isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
     isPhysicalKeyboardEnabled =
         prefs.getBool('isPhysicalKeyboardEnabled') ?? true;
     isTileAnimationEnabled = prefs.getBool('isTileAnimationEnabled') ?? true;
     autoStartDaily = prefs.getBool('autoStartDaily') ?? false;
+    hardMode = prefs.getBool('hardMode') ?? false;
     defaultWordLength = prefs.getInt('defaultWordLength') ?? 5;
 
     final savedName = prefs.getString('displayName');
@@ -45,56 +49,71 @@ class SettingsProvider extends ChangeNotifier {
 
     notifyListeners();
 
-    _initRealTimeSync();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && !user.isAnonymous) {
+      _initRealTimeSync();
+    } else {
+      debugPrint(
+        "⚠️ [SettingsProvider] Skipping Firestore sync for anonymous or null user.",
+      );
+    }
   }
 
   void _initRealTimeSync() {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    final isAnonymous = FirebaseAuth.instance.currentUser?.isAnonymous ?? false;
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid;
 
-    print("🧪 [SettingsProvider] _initRealTimeSync()");
-    print("🧪 UID: $uid");
-    print("🧪 Is anonymous: $isAnonymous");
-
-    if (uid == null) {
-      print("⚠️ UID is null — Firestore listener not initialized.");
+    if (uid == null || user!.isAnonymous) {
+      debugPrint(
+        "⚠️ [SettingsProvider] Listener not initialized — UID is null or anonymous.",
+      );
       return;
     }
 
-    _settingsStream = FirebaseFirestore.instance
+    debugPrint(
+      "📡 [SettingsProvider] Setting up Firestore listener for settings...",
+    );
+
+    _settingsSubscription = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .snapshots();
+        .snapshots()
+        .listen(
+          (snapshot) {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null || currentUser.isAnonymous) {
+              debugPrint(
+                "⛔ [SettingsProvider] User signed out or anonymous — skipping snapshot.",
+              );
+              return;
+            }
 
-    _settingsSubscription = _settingsStream?.listen(
-      (snapshot) {
-        print("✅ Firestore snapshot received for SettingsProvider");
-        final data = snapshot.data();
-        print("📦 Firestore settings data: $data");
-
-        if (data == null) {
-          print("⚠️ No settings data found in Firestore for UID: $uid");
-          return;
-        }
-
-        final cloud = data['settings'];
-        if (cloud is Map<String, dynamic>) {
-          print("📲 Applying cloud settings: $cloud");
-          _applyCloudSettings(cloud);
-        } else {
-          print("⚠️ 'settings' field is missing or not a Map<String, dynamic>");
-        }
-      },
-      onError: (error) {
-        print("🔥 Firestore listener error in SettingsProvider: $error");
-      },
-    );
+            final data = snapshot.data();
+            final cloud = data?['settings'];
+            if (cloud is Map<String, dynamic>) {
+              debugPrint(
+                "📲 [SettingsProvider] Applying cloud settings: $cloud",
+              );
+              _applyCloudSettings(cloud);
+            } else {
+              debugPrint(
+                "⚠️ [SettingsProvider] 'settings' field missing or malformed.",
+              );
+            }
+          },
+          onError: (error) {
+            debugPrint(
+              "🔥 [SettingsProvider] Firestore listener error: $error",
+            );
+          },
+          cancelOnError: true,
+        );
   }
 
-  void cancelListener() {
-    _settingsSubscription?.cancel();
+  Future<void> cancelListener() async {
+    await _settingsSubscription?.cancel();
     _settingsSubscription = null;
-    _settingsStream = null;
+    debugPrint("🔕 Firestore listener cancelled in SettingsProvider.");
   }
 
   Future<void> _applyCloudSettings(Map<String, dynamic> cloud) async {
@@ -107,8 +126,10 @@ class SettingsProvider extends ChangeNotifier {
     isTileAnimationEnabled =
         cloud['isTileAnimationEnabled'] ?? isTileAnimationEnabled;
     autoStartDaily = cloud['autoStartDaily'] ?? autoStartDaily;
+    hardMode = cloud['hardMode'] ?? hardMode;
     defaultWordLength = cloud['defaultWordLength'] ?? defaultWordLength;
     _displayName = cloud['displayName'] ?? _displayName;
+    hintsEnabled = cloud['hintsEnabled'] ?? hintsEnabled;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isHapticEnabled', isHapticEnabled);
@@ -116,8 +137,10 @@ class SettingsProvider extends ChangeNotifier {
     await prefs.setBool('isPhysicalKeyboardEnabled', isPhysicalKeyboardEnabled);
     await prefs.setBool('isTileAnimationEnabled', isTileAnimationEnabled);
     await prefs.setBool('autoStartDaily', autoStartDaily);
+    await prefs.setBool('hardMode', hardMode);
     await prefs.setInt('defaultWordLength', defaultWordLength);
     await prefs.setString('displayName', _displayName);
+    await prefs.setBool('hintsEnabled', hintsEnabled);
 
     notifyListeners();
     _applyingFromCloud = false;
@@ -181,9 +204,26 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setHardMode(bool val) {
+    hardMode = val;
+    _save('hardMode', val);
+    notifyListeners();
+  }
+
+  void setHintsEnabled(bool val) {
+    hintsEnabled = val;
+    _save('hintsEnabled', val);
+    notifyListeners();
+  }
+
   Future<void> saveToCloud() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) {
+      debugPrint(
+        "⚠️ [SettingsProvider] Skipping cloud save — user is null or anonymous.",
+      );
+      return;
+    }
 
     final data = {
       'isHapticEnabled': isHapticEnabled,
@@ -191,27 +231,34 @@ class SettingsProvider extends ChangeNotifier {
       'isPhysicalKeyboardEnabled': isPhysicalKeyboardEnabled,
       'isTileAnimationEnabled': isTileAnimationEnabled,
       'autoStartDaily': autoStartDaily,
+      'hardMode': hardMode,
       'defaultWordLength': defaultWordLength,
       'displayName': _displayName,
+      'hintsEnabled': hintsEnabled,
     };
 
-    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
       'settings': data,
     }, SetOptions(merge: true));
   }
 
   Future<void> loadFromCloud() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) return;
 
     final doc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(uid)
+        .doc(user.uid)
         .get();
     final cloud = doc.data()?['settings'];
-
     if (cloud is Map<String, dynamic>) {
       await _applyCloudSettings(cloud);
     }
+  }
+
+  @override
+  void dispose() {
+    cancelListener();
+    super.dispose();
   }
 }

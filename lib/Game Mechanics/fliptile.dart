@@ -7,6 +7,7 @@ class FlipTile extends StatefulWidget {
   final LetterMatch match;
   final Duration delay;
   final double size;
+  final VoidCallback? onCompleted; // ✅ NEW
 
   const FlipTile({
     super.key,
@@ -14,6 +15,7 @@ class FlipTile extends StatefulWidget {
     required this.match,
     required this.delay,
     required this.size,
+    this.onCompleted, // ✅ NEW
   });
 
   @override
@@ -36,6 +38,12 @@ class _FlipTileState extends State<FlipTile>
     _flip = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
     );
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        widget.onCompleted?.call(); // ✅ Call after flip finishes
+      }
+    });
 
     Future.delayed(widget.delay, () {
       if (mounted) _controller.forward();

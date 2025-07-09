@@ -6,23 +6,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class WordLengthProvider with ChangeNotifier {
   int _wordLength = 5;
+  bool _isInitialized = false;
+
   int get wordLength => _wordLength;
+  bool get isInitialized => _isInitialized;
 
   StreamSubscription<DocumentSnapshot>? _subscription;
 
   WordLengthProvider() {
-    _loadFromPrefs();
+    loadFromPrefs();
     _listenToCloud();
   }
 
-  /// Load word length from SharedPreferences
-  Future<void> _loadFromPrefs() async {
+  Future<void> loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     _wordLength = prefs.getInt('menu_wordLength') ?? 5;
+    _isInitialized = true;
     notifyListeners();
   }
 
-  /// Update word length and save to local and cloud
   void setWordLength(int length) async {
     _wordLength = length;
     notifyListeners();
@@ -33,7 +35,6 @@ class WordLengthProvider with ChangeNotifier {
     await _saveToCloud(length);
   }
 
-  /// Save to Firestore
   Future<void> _saveToCloud(int length) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -43,35 +44,50 @@ class WordLengthProvider with ChangeNotifier {
     }, SetOptions(merge: true));
   }
 
-  /// Listen to Firestore updates
   void _listenToCloud() {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) return;
+
+    final uid = user.uid;
 
     _subscription = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .snapshots()
-        .listen((doc) async {
-          final cloudValue = doc.data()?['menuWordLength'];
-          if (cloudValue is int && cloudValue != _wordLength) {
-            _wordLength = cloudValue;
+        .listen(
+          (doc) async {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null || currentUser.isAnonymous) {
+              debugPrint(
+                "🚫 [WordLengthProvider] User is signed out — skipping Firestore update.",
+              );
+              return;
+            }
 
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setInt('menu_wordLength', _wordLength);
+            final cloudValue = doc.data()?['menuWordLength'];
+            if (cloudValue is int && cloudValue != _wordLength) {
+              _wordLength = cloudValue;
 
-            notifyListeners();
-          }
-        });
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setInt('menu_wordLength', _wordLength);
+
+              notifyListeners();
+            }
+          },
+          onError: (error) {
+            debugPrint(
+              "🔥 [WordLengthProvider] Firestore listener error: $error",
+            );
+          },
+          cancelOnError: true,
+        );
   }
 
-  /// Cancel Firestore listener
   void cancelListener() {
     _subscription?.cancel();
     _subscription = null;
   }
 
-  /// Dispose to clean up the listener
   void dispose() {
     cancelListener();
     super.dispose();

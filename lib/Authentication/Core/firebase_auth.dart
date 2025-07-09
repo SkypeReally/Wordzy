@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gmae_wordle/Provider/streak_freeze.dart';
+import 'package:gmae_wordle/Provider/wordlength_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +12,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
+  /// 🔵 Google Sign-In
   Future<UserCredential?> signInWithGoogle(BuildContext context) async {
     try {
       final googleUser = await _googleSignIn.signIn();
@@ -28,45 +31,114 @@ class AuthService {
       if (user != null && user.displayName != null) {
         final name = user.displayName!.trim();
         final firstName = name.contains(' ') ? name.split(' ').first : name;
+
         final settings = Provider.of<SettingsProvider>(context, listen: false);
         settings.setDisplayName(firstName.isNotEmpty ? firstName : "Player");
       }
 
       return userCred;
     } catch (e) {
-      print('Google sign-in error: $e');
+      debugPrint('⚠️ Google sign-in error: $e');
       return null;
     }
   }
 
+  /// 🟡 Email Login
   Future<UserCredential> signInWithEmail(String email, String password) {
-    return FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
+  /// 🟢 Anonymous Login
   Future<UserCredential> signInAnonymously(BuildContext context) async {
     final credential = await _auth.signInAnonymously();
+
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     settings.setDisplayName("Guest");
+
     return credential;
   }
 
-  /// 🔐 Complete logout flow with proper cleanup
+  /// 🔴 Sign Out Flow
+  /// 🔴 Sign Out Flow
   Future<void> signOut(BuildContext context) async {
-    try {
-      // ✅ Cancel all listeners
-      Provider.of<StatsProvider>(context, listen: false).cancelCloudListener();
-      DailyWordPlayedTracker().cancelListener(); // now actually works
+    debugPrint("🚪 Starting sign out process...");
 
-      // ✅ Sign out
-      await _auth.signOut();
-      await _googleSignIn.signOut();
+    await Future.delayed(Duration.zero); // context safety
+
+    try {
+      debugPrint("🔁 Cancelling Firestore listeners...");
+
+      try {
+        await Provider.of<StatsProvider>(
+          context,
+          listen: false,
+        ).cancelCloudListener();
+        debugPrint("✅ StatsProvider listener cancelled");
+      } catch (e) {
+        debugPrint("❌ Error cancelling StatsProvider listener: $e");
+      }
+
+      try {
+        await Provider.of<SettingsProvider>(
+          context,
+          listen: false,
+        ).cancelListener();
+        debugPrint("✅ SettingsProvider listener cancelled");
+      } catch (e) {
+        debugPrint("❌ Error cancelling SettingsProvider listener: $e");
+      }
+
+      try {
+        await Provider.of<StreakFreezeProvider>(
+          context,
+          listen: false,
+        ).cancelListener();
+        debugPrint("✅ StreakFreezeProvider listener cancelled");
+      } catch (e) {
+        debugPrint("❌ Error cancelling StreakFreezeProvider listener: $e");
+      }
+
+      try {
+        Provider.of<WordLengthProvider>(
+          context,
+          listen: false,
+        ).cancelListener();
+        debugPrint("✅ WordLengthProvider listener cancelled");
+      } catch (e) {
+        debugPrint("❌ Error cancelling WordLengthProvider listener: $e");
+      }
+
+      try {
+        DailyWordPlayedTracker().cancelListener(); // ensure async wait
+        debugPrint("✅ DailyWordPlayedTracker listener cancelled");
+      } catch (e) {
+        debugPrint("❌ Error cancelling DailyWordPlayedTracker listener: $e");
+      }
+
+      // 🔐 Firebase Sign Out
+      try {
+        debugPrint("🔐 Signing out from Firebase...");
+        await _auth.signOut();
+        debugPrint("✅ Firebase sign out complete");
+      } catch (e) {
+        debugPrint("❌ Firebase sign-out error: $e");
+      }
+
+      // 🔐 Google Sign Out
+      try {
+        debugPrint("🔐 Signing out from Google...");
+        await _googleSignIn.signOut();
+        debugPrint("✅ Google sign out complete");
+      } catch (e) {
+        debugPrint("❌ Google sign-out error: $e");
+      }
+
+      debugPrint("🚪 Sign out process completed successfully");
     } catch (e) {
-      debugPrint("Logout error: $e");
+      debugPrint("⚠️ Sign out flow error: $e");
     }
   }
 
+  /// 🔁 Firebase Auth state listener
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 }

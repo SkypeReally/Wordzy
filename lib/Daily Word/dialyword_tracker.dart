@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DailyWordPlayedTracker {
+  // ✅ Singleton
   static final DailyWordPlayedTracker _instance =
       DailyWordPlayedTracker._internal();
   factory DailyWordPlayedTracker() => _instance;
@@ -13,27 +14,30 @@ class DailyWordPlayedTracker {
   StreamSubscription<DocumentSnapshot>? _listener;
 
   String? get _uid => FirebaseAuth.instance.currentUser?.uid;
+  bool get _isAnonymous =>
+      FirebaseAuth.instance.currentUser?.isAnonymous ?? true;
 
+  /// 🔹 Mark word as played for a given date/length
   Future<void> markPlayed(DateTime date, int wordLength) async {
     final prefs = await SharedPreferences.getInstance();
     final key = _generateKey(date, wordLength);
     await prefs.setBool(key, true);
-
-    await uploadToFirestore();
+    await uploadToFirestore(); // Will be skipped if anonymous
   }
 
+  /// 🔹 Check if word is played
   Future<bool> isPlayed(DateTime date, int wordLength) async {
     final prefs = await SharedPreferences.getInstance();
     final key = _generateKey(date, wordLength);
     return prefs.getBool(key) ?? false;
   }
 
+  /// 🔹 Check today's status
   static Future<bool> hasPlayedToday(int wordLength) async {
-    final tracker = DailyWordPlayedTracker();
-    final today = DateTime.now();
-    return await tracker.isPlayed(today, wordLength);
+    return await DailyWordPlayedTracker().isPlayed(DateTime.now(), wordLength);
   }
 
+  /// 🔹 Format: daily_played_5_2025-07-07
   String _generateKey(DateTime date, int wordLength) {
     final dateStr =
         "${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}";
@@ -42,6 +46,7 @@ class DailyWordPlayedTracker {
 
   String _twoDigits(int n) => n.toString().padLeft(2, '0');
 
+  /// 🔹 Extract all local played keys
   Future<Map<String, bool>> getAllPlayedStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys();
@@ -64,15 +69,18 @@ class DailyWordPlayedTracker {
     return played;
   }
 
+  /// 🔹 Upload local to Firestore
   Future<void> uploadToFirestore() async {
-    if (_uid == null) return;
+    if (_uid == null || _isAnonymous) return;
 
     final playedMap = await getAllPlayedStatus();
+
     await _firestore.collection('users').doc(_uid).set({
       'dailyWordPlayed': playedMap,
     }, SetOptions(merge: true));
   }
 
+  /// 🔹 Sync Firestore → local
   Future<void> syncFromFirestore(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
     final cloudMap = doc.data()?['dailyWordPlayed'];
@@ -94,18 +102,15 @@ class DailyWordPlayedTracker {
     }
   }
 
+  /// 🔁 Real-time sync
   void listenToDailyPlayed() {
-    final uid = _uid;
-    print("🧪 [DailyWordPlayedTracker] listenToDailyPlayed()");
-    print("🧪 UID: $uid");
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid;
+    final isAnonymous = user?.isAnonymous ?? true;
 
-    if (uid == null) {
-      print("⚠️ UID is null — DailyWord listener not started.");
-      return;
-    }
+    if (uid == null || isAnonymous) return;
 
     _listener?.cancel();
-    print("🔁 Starting Firestore listener for dailyWordPlayed...");
 
     _listener = _firestore
         .collection('users')
@@ -113,11 +118,7 @@ class DailyWordPlayedTracker {
         .snapshots()
         .listen(
           (doc) async {
-            print("📥 Received Firestore snapshot for dailyWordPlayed");
-
             final cloudMap = doc.data()?['dailyWordPlayed'];
-            print("📦 dailyWordPlayed data: $cloudMap");
-
             if (cloudMap is Map) {
               final prefs = await SharedPreferences.getInstance();
               for (final entry in cloudMap.entries) {
@@ -130,18 +131,9 @@ class DailyWordPlayedTracker {
                   if (wordLength != null) {
                     final key = 'daily_played_${wordLength}_$dateStr';
                     await prefs.setBool(key, true);
-                    print("✅ Synced local key: $key");
-                  } else {
-                    print(
-                      "⚠️ Could not parse wordLength from key: ${entry.key}",
-                    );
                   }
-                } else {
-                  print("⚠️ Invalid key format in Firestore: ${entry.key}");
                 }
               }
-            } else {
-              print("⚠️ dailyWordPlayed field missing or not a map.");
             }
           },
           onError: (error) {
@@ -152,8 +144,13 @@ class DailyWordPlayedTracker {
         );
   }
 
+  /// ❌ Cancel sync
   void cancelListener() {
     _listener?.cancel();
     _listener = null;
+  }
+
+  void dispose() {
+    cancelListener();
   }
 }

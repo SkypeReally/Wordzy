@@ -18,7 +18,7 @@ class DailyStatsView extends StatelessWidget {
     final wins = stats.dailyWins;
     final winPercent = stats.dailyWinPercentage;
     final streak = stats.dailyCurrentStreak;
-    final best = stats.dailyBestStreak;
+    final best = stats.maxStreak;
     final distribution = stats.dailyGuessDistribution;
 
     return Center(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gmae_wordle/Authentication/Pages/Log-in%20Page/Main/sign_in_page.dart';
 import 'package:gmae_wordle/Daily%20Word/dialyword_tracker.dart';
-import 'package:gmae_wordle/Pages/Mains/Menu/menu_page.dart';
+import 'package:gmae_wordle/Navigation/main_navigation.dart';
 import 'package:gmae_wordle/Provider/statsprovider.dart';
 import 'package:provider/provider.dart';
 import 'package:gmae_wordle/Provider/setting_provider.dart';
@@ -17,12 +17,17 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         final user = snapshot.data;
 
+        debugPrint(
+          "👤 AuthWrapper: user = ${user?.uid}, isAnonymous = ${user?.isAnonymous}",
+        );
+
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
+        // ❌ User not signed in or is anonymous → show LoginPage
         if (user == null) {
-          // 🔴 Logout Cleanup
+          // 🔴 Cleanup on logout
           WidgetsBinding.instance.addPostFrameCallback((_) {
             final statsProvider = context.read<StatsProvider>();
             statsProvider.cancelCloudListener();
@@ -34,14 +39,14 @@ class AuthWrapper extends StatelessWidget {
           return const LoginPage();
         }
 
-        // 🟢 Authenticated
+        // ✅ Fully signed-in user → initialize data and show MainNavigation
         return FutureBuilder(
           future: _initializeUserData(context, user),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
-            return const MenuPage();
+            return const MainNavigation();
           },
         );
       },
@@ -53,14 +58,14 @@ class AuthWrapper extends StatelessWidget {
     final statsProvider = context.read<StatsProvider>();
     final dailyTracker = DailyWordPlayedTracker();
 
-    // 🟢 Run in parallel
+    // 🧩 Load all data in parallel
     await Future.wait([
       settingsProvider.loadSettings(),
       statsProvider.loadStatsFromCloud(),
       dailyTracker.syncFromFirestore(user.uid),
     ]);
 
-    // ✅ Defer listener start until after UI is built
+    // 🎧 Start real-time listeners after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       statsProvider.listenToCloudStats();
       dailyTracker.listenToDailyPlayed();

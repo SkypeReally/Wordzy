@@ -18,9 +18,12 @@ class DailyWordService {
 
       _wordMap = {
         for (var entry in json.entries)
-          int.parse(entry.key): List<String>.from(entry.value),
+          if (int.tryParse(entry.key) != null)
+            int.parse(entry.key): List<String>.from(entry.value),
       };
+
       _isLoaded = true;
+      print("✅ Daily words loaded successfully.");
     } catch (e) {
       print("❌ Failed to load daily words: $e");
       _isLoaded = false;
@@ -32,6 +35,7 @@ class DailyWordService {
     final words = _wordMap[wordLength] ?? [];
     if (words.isEmpty) {
       print("⚠️ No words found for length $wordLength");
+
       return '';
     }
 

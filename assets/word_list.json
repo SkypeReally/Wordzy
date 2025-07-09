@@ -91,12 +91,25 @@
   "workshop", "applause", "breaking", "ceremony", "dialogue", "educator", "function", "grateful", "hygienic",
   "industry", "language", "mystical", "notebook", "oriented", "presence", "reliable", "solution", "terrific",
   "ultimate", "wildlife", "analysis", "building", "describe", "emphasis", "football", "journals", "material",
-  "neutrals", "offering", "painting", "recharge", "sensitive", "standard", "thriller", "universe", "baseline",
+  "neutrals", "offering", "painting", "recharge", "standard", "thriller", "universe", "baseline",
   "cylinder", "decision", "emotions", "foremost", "imagine", "jealousy", "midnight", "negative", "openness",
   "planning", "resident", "shipping", "tracking", "velocity", "withdraw", "alliance", "behavior", "consumer",
   "domestic", "envelope", "fidelity", "guardian", "identify", "medalist", "occasion", "precious", "security",
   "unlawful", "violence", "announce", "commerce", "daughter", "engineer", "flexible", "gasoline", "historic",
   "interest", "juvenile", "lighting", "migration", "national", "personal", "relevant", "specific", "vertical",
   "wideness", "abundant", "breeding", "colossal", "endeavor", "feedback", "glorious", "homeland", "meditate",
-  "opposite", "resource", "situation", "triangle", "upcoming", "vocation", "worrying"]
+  "opposite", "resource", "situation", "triangle", "upcoming", "vocation", "worrying"],
+
+ "categories": {
+    "animals": ["TIGER", "ZEBRA", "HORSE"],
+    "birds": ["EAGLE", "ROBIN", "SWIFT"],
+    "fruits": ["ORANGE", "BANANA"]
+  }
+
+
+
+
 }
+
+
+

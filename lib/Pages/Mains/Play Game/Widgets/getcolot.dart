@@ -4,12 +4,12 @@ import 'package:gmae_wordle/Game%20Mechanics/lettermatch.dart';
 Color getColorFromMatch(LetterMatch match) {
   switch (match) {
     case LetterMatch.correct:
-      return const Color(0xFF6AAA64); // Wordle green
+      return const Color(0xFF6AAA64); // green
     case LetterMatch.present:
-      return const Color(0xFFC9B458); // Wordle yellow
+      return const Color(0xFFC9B458); // yellow
     case LetterMatch.absent:
-      return const Color(0xFF787C7E); // Wordle grey
+      return const Color(0xFF787C7E); // grey
     case LetterMatch.none:
-      return const Color(0xFFDEE1E9); // Light gray for empty/default tiles
+      return Colors.transparent; // ✅ no veil
   }
 }
