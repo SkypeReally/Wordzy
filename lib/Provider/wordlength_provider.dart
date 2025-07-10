@@ -1,77 +1,113 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WordLengthProvider with ChangeNotifier {
-  int _wordLength = 5;
+  int? _wordLength; // nullable until initialized
   bool _isInitialized = false;
-
-  int get wordLength => _wordLength;
-  bool get isInitialized => _isInitialized;
 
   StreamSubscription<DocumentSnapshot>? _subscription;
 
-  WordLengthProvider() {
-    loadFromPrefs();
+  int get wordLength {
+    if (!_isInitialized) {
+      throw Exception("WordLengthProvider not initialized yet");
+    }
+    return _wordLength!;
+  }
+
+  bool get isInitialized => _isInitialized;
+
+  WordLengthProvider();
+
+  /// Call this on startup to load from local prefs + cloud
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    int? localLength = prefs.getInt('menuWordLength');
+
+    if (localLength != null) {
+      _wordLength = localLength;
+      debugPrint("🟢 [WordLengthProvider] Loaded from prefs: $localLength");
+    } else {
+      // Fallback default
+      _wordLength = 5;
+      debugPrint("🟡 [WordLengthProvider] No prefs found, using default: 5");
+    }
+
+    _isInitialized = true;
+    notifyListeners();
+
     _listenToCloud();
   }
 
-  Future<void> loadFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    _wordLength = prefs.getInt('menu_wordLength') ?? 5;
-    _isInitialized = true;
-    notifyListeners();
-  }
-
   void setWordLength(int length) async {
+    if (!_isInitialized) {
+      debugPrint("⚠️ [WordLengthProvider] setWordLength called before init");
+      return;
+    }
+    if (_wordLength == length) return;
+
     _wordLength = length;
+    debugPrint("🔁 [WordLengthProvider] Word length updated: $length");
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('menu_wordLength', length);
+    await prefs.setInt('menuWordLength', length);
 
     await _saveToCloud(length);
   }
 
   Future<void> _saveToCloud(int length) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) return;
 
-    await FirebaseFirestore.instance.collection('users').doc(uid).set({
-      'menuWordLength': length,
-    }, SetOptions(merge: true));
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'menuWordLength': length,
+      }, SetOptions(merge: true));
+      debugPrint("✅ [WordLengthProvider] Saved to Firestore: $length");
+    } catch (e) {
+      debugPrint("🔥 [WordLengthProvider] Error saving to cloud: $e");
+    }
   }
 
   void _listenToCloud() {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null || user.isAnonymous) return;
-
-    final uid = user.uid;
+    if (user == null || user.isAnonymous) {
+      debugPrint(
+        "⚠️ [WordLengthProvider] No signed-in user. Skipping Firestore listener.",
+      );
+      return;
+    }
 
     _subscription = FirebaseFirestore.instance
         .collection('users')
-        .doc(uid)
+        .doc(user.uid)
         .snapshots()
         .listen(
           (doc) async {
             final currentUser = FirebaseAuth.instance.currentUser;
             if (currentUser == null || currentUser.isAnonymous) {
               debugPrint(
-                "🚫 [WordLengthProvider] User is signed out — skipping Firestore update.",
+                "🚫 [WordLengthProvider] User signed out – ignoring Firestore update.",
               );
               return;
             }
 
             final cloudValue = doc.data()?['menuWordLength'];
             if (cloudValue is int && cloudValue != _wordLength) {
+              debugPrint(
+                "☁️ [WordLengthProvider] Cloud updated value: $cloudValue",
+              );
+
               _wordLength = cloudValue;
+              notifyListeners();
 
               final prefs = await SharedPreferences.getInstance();
-              await prefs.setInt('menu_wordLength', _wordLength);
-
-              notifyListeners();
+              await prefs.setInt('menuWordLength', cloudValue);
             }
           },
           onError: (error) {
@@ -88,6 +124,7 @@ class WordLengthProvider with ChangeNotifier {
     _subscription = null;
   }
 
+  @override
   void dispose() {
     cancelListener();
     super.dispose();

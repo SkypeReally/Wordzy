@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gmae_wordle/Provider/category_progress_provider.dart';
 import 'package:gmae_wordle/Provider/setting_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -39,26 +40,35 @@ class _PlayGamePageState extends State<PlayGamePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initController());
+    // ❌ Don't call _initController here; wait for provider init in build
   }
 
   Future<void> _initController() async {
-    // Unfocus keyboard
     FocusManager.instance.primaryFocus?.unfocus();
 
     final wordLengthProvider = context.read<WordLengthProvider>();
 
-    // ✅ Ensure word length is loaded before using it
-    if (!widget.isDailyMode && !wordLengthProvider.isInitialized) {
-      await wordLengthProvider.loadFromPrefs(); // Use public method if needed
+    int wordLength;
+
+    if (widget.fixedWord != null && widget.fixedWord!.isNotEmpty) {
+      wordLength = widget.fixedWord!.length;
+
+      debugPrint(
+        "📌 Using fixedWord: ${widget.fixedWord}, length: $wordLength",
+      );
+      // ⚠️ Do NOT call wordLengthProvider.setWordLength() here
+    } else if (widget.isDailyMode) {
+      wordLength = widget.dailyWordLength!;
+      debugPrint("📅 Daily mode: word length = $wordLength");
+    } else {
+      if (!wordLengthProvider.isInitialized) {
+        debugPrint("⏳ WordLengthProvider not ready yet. Delaying init.");
+        return;
+      }
+      wordLength = wordLengthProvider.wordLength;
+      debugPrint("🕹️ Normal mode: word length from provider = $wordLength");
     }
 
-    // 🎯 Determine word length based on mode
-    final wordLength = widget.isDailyMode
-        ? widget.dailyWordLength!
-        : wordLengthProvider.wordLength;
-
-    // 🎮 Create a new controller
     final newController = GameController(
       context: context,
       wordLength: wordLength,
@@ -71,21 +81,33 @@ class _PlayGamePageState extends State<PlayGamePage> {
       refreshUI: _refreshUI,
     );
 
-    // ⏳ Load game word and prepare state
     await newController.initializeGame();
 
-    // ✅ Set controller only if widget is still active
     if (mounted) {
       setState(() => controller = newController);
+
+      debugPrint("✅ GameController initialized");
+      debugPrint("📏 Provider wordLength = ${wordLengthProvider.wordLength}");
+      debugPrint("📏 Controller wordLength = ${newController.wordLength}");
     }
   }
 
   void _onGameOver(bool won, String answer) {
+    final isCategoryMode = widget.category != null;
+
+    if (isCategoryMode && won) {
+      final categoryProvider = context.read<CategoryProgressProvider>();
+      categoryProvider.markWordFound(widget.category!, answer);
+    }
+
     showEndGameDialog(
       context: context,
       won: won,
-      answerWord: answer,
+      answerWord: isCategoryMode && !won
+          ? null
+          : answer, // ✅ Hide answer if lost in category
       isDailyMode: widget.isDailyMode,
+      category: widget.category,
       onNewGame: () async {
         if (controller != null) {
           await controller!.restartGame();
@@ -125,17 +147,19 @@ class _PlayGamePageState extends State<PlayGamePage> {
   Widget build(BuildContext context) {
     final wordLengthProvider = context.watch<WordLengthProvider>();
 
-    // ⏳ Wait until wordLength is loaded from SharedPreferences
     if (!widget.isDailyMode && !wordLengthProvider.isInitialized) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // ✅ Determine the correct word length
-    final wordLength = widget.isDailyMode
-        ? widget.dailyWordLength!
-        : wordLengthProvider.wordLength;
+    // 🛠 Trigger init after wordLengthProvider is ready
+    if (controller == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && controller == null) {
+          _initController();
+        }
+      });
+    }
 
-    // ⏳ Wait until controller is initialized and word is loaded
     if (controller == null || !controller!.isWordLoaded) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -143,7 +167,7 @@ class _PlayGamePageState extends State<PlayGamePage> {
     final settings = context.watch<SettingsProvider>();
 
     final String pageTitle = widget.category != null
-        ? '${widget.category} Wordle'
+        ? '${widget.category}'
         : widget.isDailyMode
         ? 'Daily Word'
         : 'Play';
@@ -153,6 +177,8 @@ class _PlayGamePageState extends State<PlayGamePage> {
         settings.hintsEnabled &&
         !settings.hardMode &&
         !(controller?.hasUsedHint ?? true);
+
+    final wordLength = controller!.wordLength;
 
     return KeyboardListener(
       focusNode: _focusNode,

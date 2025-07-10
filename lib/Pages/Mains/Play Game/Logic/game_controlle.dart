@@ -4,9 +4,10 @@ import 'package:gmae_wordle/Authentication/Pages/Log-in Page/Main/sign_in_page.d
 import 'package:gmae_wordle/Game Mechanics/guessrow.dart';
 import 'package:gmae_wordle/Game Mechanics/lettermatch.dart';
 import 'package:gmae_wordle/Daily Word/dialyword_tracker.dart';
+import 'package:gmae_wordle/Provider/category_progress_provider.dart';
 import 'package:gmae_wordle/Provider/setting_provider.dart';
 import 'package:gmae_wordle/Provider/statsprovider.dart';
-import 'package:gmae_wordle/Provider/wordlength_provider.dart';
+// import 'package:gmae_wordle/Provider/wordlength_provider.dart';
 import 'package:gmae_wordle/Service/dailyword_service.dart';
 import 'package:gmae_wordle/Service/sound_service.dart';
 import 'package:gmae_wordle/Service/vibration_service.dart';
@@ -98,7 +99,10 @@ class GameController {
     }
 
     if (isDailyMode) {
-      if (dailyWordLength == null) return;
+      if (dailyWordLength == null) {
+        debugPrint("❌ Daily word length is null!");
+        return;
+      }
       final played = await DailyWordPlayedTracker.hasPlayedToday(
         dailyWordLength!,
       );
@@ -108,7 +112,13 @@ class GameController {
       }
     }
 
-    await restartGame();
+    await restartGame(); // This will use correct logic
+
+    debugPrint("📋 Mode: ${isDailyMode ? 'Daily' : 'Normal'}");
+    debugPrint("📋 Provided dailyWordLength: $dailyWordLength");
+    debugPrint(
+      "📋 Final word length used: ${isDailyMode ? dailyWordLength : wordLength}",
+    );
   }
 
   void handleLastFlipDone() {
@@ -123,19 +133,27 @@ class GameController {
   Future<void> restartGame() async {
     hasUsedHint = false;
 
-    final int length = isDailyMode
-        ? dailyWordLength!
-        : context.read<WordLengthProvider>().wordLength;
+    final int length = isDailyMode ? dailyWordLength! : wordLength;
 
     if (fixedWord != null) {
       answerWord = fixedWord!;
     } else if (isDailyMode) {
       answerWord = DailyWordService.getDailyWord(length, DateTime.now());
     } else if (category != null) {
-      answerWord = await WordListService.getRandomWordFromCategory(
-        category!,
-        length,
-      );
+      final progress = context.read<CategoryProgressProvider>();
+
+      final allWords = WordListService.getCategoryWords(category!, length);
+      final usedWords = progress.getFoundWords(category!);
+      final remainingWords = allWords
+          .where((word) => !usedWords.contains(word.toUpperCase()))
+          .toList();
+
+      if (remainingWords.isEmpty) {
+        // Optionally notify user if all words are found
+        answerWord = allWords[Random().nextInt(allWords.length)];
+      } else {
+        answerWord = remainingWords[Random().nextInt(remainingWords.length)];
+      }
     } else {
       answerWord = await WordListService.getRandomWord(length);
     }
@@ -151,7 +169,9 @@ class GameController {
 
     hintedIndex = null;
     hintedMatch = null;
+
     debugPrint("🎯 Game started. Target word: $answerWord");
+    debugPrint("🟢 Word Length: $length");
   }
 
   Future<void> handleKeyPress(String key) async {
@@ -163,7 +183,6 @@ class GameController {
     if (key == '⌫') {
       for (int i = length - 1; i >= 0; i--) {
         if (currentGuess[i].isNotEmpty) {
-          // ❌ Don't allow deleting hinted tile
           if (i == hintedIndex) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Hinted tile cannot be deleted.")),
@@ -193,14 +212,11 @@ class GameController {
           return;
         }
         await _processGuess(settings, length);
-
-        // ✅ Clear hint after processing the guess
         hintedIndex = null;
         hintedMatch = null;
       }
     } else if (RegExp(r'^[A-Z]$').hasMatch(key)) {
       for (int i = 0; i < length; i++) {
-        // ✅ Skip hinted tile while typing
         if (currentGuess[i].isEmpty && i != hintedIndex) {
           currentGuess[i] = key;
           break;
@@ -340,9 +356,9 @@ class GameController {
     final answerLetters = answerWord.split('');
     final usedLetters = guesses.expand((g) => g.letters).toSet();
     final knownCorrect = List<String?>.filled(answerLetters.length, null);
-
     for (final row in guesses) {
-      for (int i = 0; i < row.letters.length; i++) {
+      final limit = min(row.letters.length, knownCorrect.length);
+      for (int i = 0; i < limit; i++) {
         if (row.matches[i] == LetterMatch.correct) {
           knownCorrect[i] = row.letters[i];
         }

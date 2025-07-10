@@ -3,17 +3,34 @@ import 'package:flutter/material.dart';
 void showEndGameDialog({
   required BuildContext context,
   required bool won,
-  required String answerWord,
+  required String? answerWord,
   required bool isDailyMode,
+  String? category,
   required VoidCallback onNewGame,
 }) {
   final theme = Theme.of(context);
   final isDark = theme.brightness == Brightness.dark;
   final textColor = isDark ? Colors.white : Colors.black;
 
+  final isCategory = category != null;
+
+  final title = won
+      ? "🎉 You Won!"
+      : isCategory
+      ? "😢 You Lost"
+      : "😢 You Lost";
+
+  final message = won
+      ? "The word was: ${answerWord ?? '???'}"
+      : isCategory
+      ? "Try again with a new word from the \"$category\" category."
+      : "The word was: ${answerWord ?? '???'}";
+
+  final tryAgainLabel = isCategory ? "Try Again" : "New Game";
+
   showDialog(
     context: context,
-    barrierDismissible: false, // prevent accidental dismissal
+    barrierDismissible: false,
     builder: (_) => AlertDialog(
       backgroundColor: isDark ? Colors.grey[900] : Colors.white,
       contentPadding: const EdgeInsets.all(24),
@@ -29,7 +46,7 @@ void showEndGameDialog({
           ),
           const SizedBox(height: 16),
           Text(
-            won ? "You Won!" : "You Lost!",
+            title,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
@@ -38,8 +55,9 @@ void showEndGameDialog({
           ),
           const SizedBox(height: 10),
           Text(
-            "The word was: $answerWord",
+            message,
             style: TextStyle(fontSize: 16, color: textColor.withOpacity(0.85)),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
           Wrap(
@@ -67,10 +85,10 @@ void showEndGameDialog({
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },
               ),
-              if (!isDailyMode)
+              if (!isDailyMode || isCategory)
                 TextButton.icon(
                   icon: const Icon(Icons.replay),
-                  label: const Text("New Game"),
+                  label: Text(tryAgainLabel),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gmae_wordle/Pages/Drawer/Settings/Toggle/dropdown_tile.dart';
 import 'package:gmae_wordle/Pages/Drawer/Settings/Instances/reset_button.dart';
-import 'package:gmae_wordle/Pages/Drawer/Settings/Instances/support_tile.dart';
 import 'package:gmae_wordle/Pages/Drawer/Settings/Toggle/switchtile.dart';
 import 'package:gmae_wordle/Provider/setting_provider.dart';
 // import 'package:gmae_wordle/Service/firebase_auth.dart';
@@ -79,7 +78,6 @@ class SettingsPage extends StatelessWidget {
               onPressed: () => _confirmResetAllStats(context, stats),
             ),
             const Divider(height: 32),
-            const SettingsSupportTile(),
           ],
         ),
       ),

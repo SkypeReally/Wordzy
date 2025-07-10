@@ -1,5 +1,9 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:gmae_wordle/Provider/wordlength_provider.dart';
+import 'package:gmae_wordle/main.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,11 +27,17 @@ class SettingsProvider extends ChangeNotifier {
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
   _settingsSubscription;
 
+  bool _isLoaded = false;
+  bool get isLoaded => _isLoaded;
+
   SettingsProvider();
 
+  /// Loads settings from local prefs and cloud (if user logged in),
+  /// and starts Firestore listener.
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
+    // Load local prefs first
     hintsEnabled = prefs.getBool('hintsEnabled') ?? false;
     isHapticEnabled = prefs.getBool('isHapticEnabled') ?? true;
     isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
@@ -51,10 +61,42 @@ class SettingsProvider extends ChangeNotifier {
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && !user.isAnonymous) {
-      _initRealTimeSync();
+      debugPrint("🟢 [SettingsProvider] Loading settings from Firestore...");
+      // Load once from Firestore and apply
+      await _loadFromCloudOnce();
+
+      // Start real-time listener after initial load
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initRealTimeSync();
+      });
     } else {
       debugPrint(
         "⚠️ [SettingsProvider] Skipping Firestore sync for anonymous or null user.",
+      );
+    }
+
+    // Mark loaded after local + cloud
+    _isLoaded = true;
+    notifyListeners();
+  }
+
+  Future<void> _loadFromCloudOnce() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.isAnonymous) return;
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final cloud = doc.data()?['settings'];
+      if (cloud is Map<String, dynamic>) {
+        await _applyCloudSettings(cloud);
+        debugPrint("☁️ [SettingsProvider] Initial cloud settings loaded.");
+      }
+    } catch (e) {
+      debugPrint(
+        "🔥 [SettingsProvider] Error loading settings from Firestore: $e",
       );
     }
   }
@@ -92,7 +134,7 @@ class SettingsProvider extends ChangeNotifier {
             final cloud = data?['settings'];
             if (cloud is Map<String, dynamic>) {
               debugPrint(
-                "📲 [SettingsProvider] Applying cloud settings: $cloud",
+                "📲 [SettingsProvider] Applying cloud settings update: $cloud",
               );
               _applyCloudSettings(cloud);
             } else {
@@ -118,18 +160,59 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> _applyCloudSettings(Map<String, dynamic> cloud) async {
     _applyingFromCloud = true;
+    debugPrint("☁️ [SettingsProvider] Applying cloud settings...");
 
-    isHapticEnabled = cloud['isHapticEnabled'] ?? isHapticEnabled;
-    isSoundEnabled = cloud['isSoundEnabled'] ?? isSoundEnabled;
-    isPhysicalKeyboardEnabled =
-        cloud['isPhysicalKeyboardEnabled'] ?? isPhysicalKeyboardEnabled;
-    isTileAnimationEnabled =
-        cloud['isTileAnimationEnabled'] ?? isTileAnimationEnabled;
-    autoStartDaily = cloud['autoStartDaily'] ?? autoStartDaily;
-    hardMode = cloud['hardMode'] ?? hardMode;
-    defaultWordLength = cloud['defaultWordLength'] ?? defaultWordLength;
-    _displayName = cloud['displayName'] ?? _displayName;
-    hintsEnabled = cloud['hintsEnabled'] ?? hintsEnabled;
+    if (cloud.containsKey('isHapticEnabled')) {
+      isHapticEnabled = cloud['isHapticEnabled'];
+    }
+    if (cloud.containsKey('isSoundEnabled')) {
+      isSoundEnabled = cloud['isSoundEnabled'];
+    }
+    if (cloud.containsKey('isPhysicalKeyboardEnabled')) {
+      isPhysicalKeyboardEnabled = cloud['isPhysicalKeyboardEnabled'];
+    }
+    if (cloud.containsKey('isTileAnimationEnabled')) {
+      isTileAnimationEnabled = cloud['isTileAnimationEnabled'];
+    }
+    if (cloud.containsKey('autoStartDaily')) {
+      autoStartDaily = cloud['autoStartDaily'];
+    }
+    if (cloud.containsKey('hardMode')) {
+      hardMode = cloud['hardMode'];
+    }
+    if (cloud.containsKey('defaultWordLength')) {
+      final newLength = cloud['defaultWordLength'];
+      if (defaultWordLength != newLength) {
+        defaultWordLength = newLength;
+
+        // ✅ Update WordLengthProvider if context is available
+        final context = navigatorKey.currentContext;
+        if (context != null) {
+          try {
+            final wordLengthProvider = context.read<WordLengthProvider>();
+            wordLengthProvider.setWordLength(defaultWordLength);
+            debugPrint(
+              "🔁 [SettingsProvider] WordLengthProvider synced to $defaultWordLength from cloud.",
+            );
+          } catch (e) {
+            debugPrint(
+              "⚠️ [SettingsProvider] Failed to update WordLengthProvider: $e",
+            );
+          }
+        }
+      }
+    }
+
+    if (cloud.containsKey('hintsEnabled')) {
+      hintsEnabled = cloud['hintsEnabled'];
+    }
+
+    if (cloud.containsKey('displayName')) {
+      _displayName = cloud['displayName'];
+    } else {
+      final user = FirebaseAuth.instance.currentUser;
+      _displayName = user?.displayName?.split(" ").first ?? "Player";
+    }
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isHapticEnabled', isHapticEnabled);
@@ -139,8 +222,8 @@ class SettingsProvider extends ChangeNotifier {
     await prefs.setBool('autoStartDaily', autoStartDaily);
     await prefs.setBool('hardMode', hardMode);
     await prefs.setInt('defaultWordLength', defaultWordLength);
-    await prefs.setString('displayName', _displayName);
     await prefs.setBool('hintsEnabled', hintsEnabled);
+    await prefs.setString('displayName', _displayName);
 
     notifyListeners();
     _applyingFromCloud = false;
@@ -235,25 +318,14 @@ class SettingsProvider extends ChangeNotifier {
       'defaultWordLength': defaultWordLength,
       'displayName': _displayName,
       'hintsEnabled': hintsEnabled,
+      'updatedAt': FieldValue.serverTimestamp(),
     };
 
     await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
       'settings': data,
     }, SetOptions(merge: true));
-  }
 
-  Future<void> loadFromCloud() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null || user.isAnonymous) return;
-
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    final cloud = doc.data()?['settings'];
-    if (cloud is Map<String, dynamic>) {
-      await _applyCloudSettings(cloud);
-    }
+    debugPrint("☁️ [SettingsProvider] Settings saved to Firestore.");
   }
 
   @override

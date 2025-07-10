@@ -21,11 +21,27 @@ class WordListService {
       if (key == "categories" && jsonData[key] is Map) {
         final Map<String, dynamic> categoryData = jsonData[key];
         for (var categoryKey in categoryData.keys) {
-          final words = List<String>.from(categoryData[categoryKey])
-              .map((w) => w.trim().toUpperCase())
-              .where((w) => w.isNotEmpty)
-              .toList();
-          _categoryWordLists[categoryKey.toLowerCase()] = words;
+          final categoryValue = categoryData[categoryKey];
+          final List<String> flatWords = [];
+
+          if (categoryValue is Map<String, dynamic>) {
+            for (var lenKey in categoryValue.keys) {
+              final words = List<String>.from(categoryValue[lenKey])
+                  .map((w) => w.trim().toUpperCase())
+                  .where((w) => w.isNotEmpty)
+                  .toList();
+              flatWords.addAll(words);
+            }
+          } else if (categoryValue is List) {
+            // Legacy support: flat list
+            flatWords.addAll(
+              categoryValue
+                  .map((w) => w.toString().trim().toUpperCase())
+                  .where((w) => w.isNotEmpty),
+            );
+          }
+
+          _categoryWordLists[categoryKey.toLowerCase()] = flatWords;
         }
       } else {
         final int length = int.tryParse(key) ?? 0;
@@ -42,7 +58,7 @@ class WordListService {
     _loaded = true;
   }
 
-  /// Returns a random word for the given length (non-daily, general mode).
+  /// Returns a random general word of a specific length.
   static Future<String> getRandomWord(int length) async {
     await loadWordList();
     final list = _wordLists[length] ?? [];
@@ -50,13 +66,13 @@ class WordListService {
     return list[Random().nextInt(list.length)];
   }
 
-  /// Returns a deterministic daily word based on the current date.
+  /// Returns a deterministic daily word of specific length.
   static Future<String> getDailyWord(int length) async {
     await loadWordList();
     final list = _wordLists[length] ?? [];
 
     debugPrint(
-      "📘 DailyWordService: loaded list for length $length → ${list.length} words",
+      "📘 DailyWordService: Loaded list for length $length → ${list.length} words",
     );
 
     if (list.isEmpty) {
@@ -77,10 +93,12 @@ class WordListService {
     return word;
   }
 
-  /// Returns a random word from a given category and word length.
+  /// Returns a random word from a given category of a specific length range.
   static Future<String> getRandomWordFromCategory(
     String category,
-    int length,
+    int minLength,
+    int maxLength,
+    Set<String> alreadyFoundWords,
   ) async {
     await loadWordList();
 
@@ -89,28 +107,66 @@ class WordListService {
       throw Exception('No words found for category "$category"');
     }
 
-    final filtered = words.where((w) => w.length == length).toList();
-    if (filtered.isEmpty) {
+    // Filter by length
+    final lengthFiltered = words
+        .where((w) => w.length >= minLength && w.length <= maxLength)
+        .toSet();
+
+    // Exclude already found words
+    final available = lengthFiltered
+        .difference(
+          alreadyFoundWords.map((w) => w.trim().toUpperCase()).toSet(),
+        )
+        .toList();
+
+    if (available.isEmpty) {
       throw Exception(
-        'No words of length $length found in category "$category"',
+        '🎉 All words found or none available for category "$category"',
       );
     }
 
-    return filtered[Random().nextInt(filtered.length)];
+    available.shuffle();
+    return available.first;
   }
 
-  /// Returns all words for a given length.
+  /// Returns a random word from a category of any length.
+  static Future<String> getRandomWordFromCategoryAnyLength(
+    String category,
+  ) async {
+    await loadWordList();
+
+    final words = _categoryWordLists[category.toLowerCase()];
+    if (words == null || words.isEmpty) {
+      throw Exception('No words found in category "$category"');
+    }
+
+    return words[Random().nextInt(words.length)];
+  }
+
+  /// Returns all available general words for a given length.
   static List<String> getListForLength(int length) {
     return _wordLists[length] ?? [];
   }
 
-  /// Returns all available categories (as lowercase names).
+  /// Returns all available categories (in lowercase).
   static List<String> getAvailableCategories() {
-    return _categoryWordLists.keys.toList();
+    return _categoryWordLists.keys.toList()..sort();
   }
 
-  /// Returns all words in a category (no filtering by length).
+  /// Returns all words in a category (regardless of length).
   static List<String> getWordsFromCategory(String category) {
     return _categoryWordLists[category.toLowerCase()] ?? [];
+  }
+
+  /// Returns all distinct word lengths available in a category.
+  static List<int> getAvailableLengthsForCategory(String category) {
+    final words = _categoryWordLists[category.toLowerCase()] ?? [];
+    return words.map((w) => w.length).toSet().toList()..sort();
+  }
+
+  /// ✅ NEW: Returns words of a specific length in a category.
+  static List<String> getCategoryWords(String category, int length) {
+    final words = _categoryWordLists[category.toLowerCase()] ?? [];
+    return words.where((w) => w.length == length).toList();
   }
 }

@@ -3,44 +3,51 @@ import 'package:gmae_wordle/Pages/Category/category_page.dart';
 import 'package:gmae_wordle/Pages/Mains/Daily%20Word/Main/dailyword_page.dart';
 
 import 'package:gmae_wordle/Pages/Mains/Menu/menu_drawer.dart';
-import 'package:gmae_wordle/Pages/Mains/Menu/menu_page.dart';
+import 'package:gmae_wordle/Pages/Mains/Menu/menu_page.dart'; // ✅ Your Drawer
 
-class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+class MainNavigationPage extends StatefulWidget {
+  const MainNavigationPage({super.key});
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  State<MainNavigationPage> createState() => _MainNavigationPageState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
-  int _currentIndex = 0;
+class _MainNavigationPageState extends State<MainNavigationPage> {
+  int _selectedIndex = 0;
+  final PageController _pageController = PageController();
 
   final List<Widget> _pages = const [
-    HomePage(), // 🏠 Play Game + Word Length
-    DailyWordPage(), // 📅 Daily Word
-    CategoriesPage(), // 🧩 Categories List
+    HomePage(),
+    DailyWordPage(),
+    CategoriesPage(),
   ];
 
-  final List<String> _titles = const ['Play', 'Daily Word', 'Categories'];
+  void _onItemTapped(int index) {
+    setState(() => _selectedIndex = index);
+    _pageController.jumpToPage(index);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_currentIndex]), centerTitle: true),
-      drawer: const MenuDrawer(), // drawer stays consistent
-      body: _pages[_currentIndex],
+      drawer: const MenuDrawer(), // ✅ Add this here!
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) => setState(() => _selectedIndex = index),
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.play_arrow), label: 'Play'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
-            label: 'Daily',
+            label: "Daily",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.category),
-            label: 'Categories',
+            label: "Categories",
           ),
         ],
       ),

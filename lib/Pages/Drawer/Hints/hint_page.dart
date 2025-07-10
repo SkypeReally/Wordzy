@@ -10,7 +10,37 @@ class HintsPage extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Hints')),
+      appBar: AppBar(
+        title: const Text('Hints'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'How hints work',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text('Hint System'),
+                  content: const Text(
+                    'You can use one of three hint types:\n\n'
+                    '• Green: Reveals correct letter in correct position.\n'
+                    '• Yellow: Correct letter, wrong spot.\n'
+                    '• Grey: Marks unused letter.\n\n'
+                    'Only available in normal mode.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("OK"),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -18,10 +48,14 @@ class HintsPage extends StatelessWidget {
           children: [
             SwitchListTile(
               value: settings.hintsEnabled,
-              onChanged: (enabled) => settings.setHintsEnabled(enabled),
+              onChanged: settings.hardMode
+                  ? null // ❌ Disabled in hard mode
+                  : (enabled) => settings.setHintsEnabled(enabled),
               title: const Text("Enable Hints"),
-              subtitle: const Text(
-                "Allow hints during normal mode (not daily or hard mode).",
+              subtitle: Text(
+                settings.hardMode
+                    ? "Hints are disabled while Hard Mode is active."
+                    : "Allow hints during normal mode (not daily or hard mode).",
               ),
             ),
 
@@ -48,9 +82,12 @@ class HintsPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             if (settings.hardMode)
-              const Text(
-                "Hints are disabled in Hard Mode.",
-                style: TextStyle(color: Colors.redAccent),
+              const ListTile(
+                leading: Icon(Icons.lock, color: Colors.redAccent),
+                title: Text("Hard Mode Active"),
+                subtitle: Text(
+                  "Hints are automatically disabled in Hard Mode.",
+                ),
               ),
           ],
         ),

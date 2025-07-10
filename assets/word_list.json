@@ -19,8 +19,8 @@
   "heap", "inch", "jolt", "knob", "lobe", "moat", "neck", "oval", "puff", "quip", "rook", "slot", "trap",
   "vent", "warp", "yawn", "zing", "crib", "drab", "envs", "flit", "glum", "harp", "ibis", "jeep", "kelp",
   "limn", "muck", "numb", "ogre", "pant", "quit", "rift", "slag", "tick", "ugly", "vibe", "weld", "xray",
-  "yule", "zeal", "crow", "dive", "elk", "fizz", "gnaw", "halt", "jade", "keen", "lank", "limp", "mire",
-  "nook", "ooze", "pike", "reel", "stub", "toad", "user", "vile", "watt", "xenon", "yoga", "zest", "chip",
+  "yule", "zeal", "crow", "dive", "fizz", "gnaw", "halt", "jade", "keen", "lank", "limp", "mire",
+  "nook", "ooze", "pike", "reel", "stub", "toad", "user", "vile", "watt", "yoga", "zest", "chip",
   "dote", "earn", "flex", "gush", "hurl", "isle", "jibe"],
 
 
@@ -41,7 +41,7 @@
 
 
 
-  "6": ["planet", "wander", "fabric", "branch", "strike", "gentle", "scarce", "prompt", "plunge", "ignite",
+  "6": ["planet", "wander", "fabric", "branch", "strike", "gentle", "scarce", "plunge", "ignite",
   "marble", "unwind", "thrive", "breeze", "juggle", "wisdom", "scheme", "temple", "carpet", "gospel", "bright",
   "puzzle", "forget", "anchor", "invent", "growth", "legend", "serene", "artist", "demand", "border", "import",
   "humble", "pardon", "sailor", "harbor", "orange", "cactus", "bronze", "circle", "esteem", "absorb", "injury",
@@ -66,7 +66,7 @@
   "brevity", "arrange", "zealous", "notable", "resolve", "tourism", "healthy", "diverse", "uniform", "builder",
   "warrior", "respect", "explode", "adopted", "charmer", "profile", "strange", "impress", "plastic", "chapter",
   "protest", "bedroom", "extract", "fantasy", "special", "harmony", "explain", "crafted", "officer", "journal",
-  "numeric", "complex", "silence", "smiling", "imagine", "poverty", "revenue", "village", "fortune", "trainer",
+  "numeric", "complex", "silence", "smiling", "imagine", "revenue", "village", "fortune", "trainer",
   "vividly", "examine", "install", "current", "trinity", "tribute", "scanner", "network", "forever", "approve",
   "variety", "missing", "disease", "awesome", "decline", "adverse", "carrier", "unified", "believe", "correct",
   "exposed", "several", "general", "request", "present", "observe", "weather", "fashion", "compose", "loyalty",
@@ -81,29 +81,38 @@
 
 
 
-  "8": ["adventure", "complaint", "creation", "dynamics", "elevation", "fragment", "handover", "incident",
+  "8": [ "creation", "dynamics",  "fragment", "handover", "incident",
   "junction", "landmark", "merchant", "narrator", "observer", "pleasure", "quantity", "radiator", "scenario",
   "training", "vacation", "workflow", "audience", "blessing", "champion", "delusion", "equation", "forensic",
   "graduate", "heritage", "increase", "invasion", "judgment", "kneeling", "learning", "marriage", "nominate",
-  "opponent", "practice", "quotation", "reliance", "spectrum", "triumphs", "umbrella", "valuable", "warranty",
+  "opponent", "practice", "reliance", "spectrum", "triumphs", "umbrella", "valuable", "warranty",
   "argument", "campaign", "deadline", "equality", "favorite", "generate", "hospital", "illusion", "laughter",
-  "memories", "navigate", "official", "patience", "question", "regional", "struggle", "treatment", "validate",
+  "memories", "navigate", "official", "patience", "question", "regional", "struggle",  "validate",
   "workshop", "applause", "breaking", "ceremony", "dialogue", "educator", "function", "grateful", "hygienic",
   "industry", "language", "mystical", "notebook", "oriented", "presence", "reliable", "solution", "terrific",
   "ultimate", "wildlife", "analysis", "building", "describe", "emphasis", "football", "journals", "material",
   "neutrals", "offering", "painting", "recharge", "standard", "thriller", "universe", "baseline",
-  "cylinder", "decision", "emotions", "foremost", "imagine", "jealousy", "midnight", "negative", "openness",
+  "cylinder", "decision", "emotions", "foremost", "jealousy", "midnight", "negative", "openness",
   "planning", "resident", "shipping", "tracking", "velocity", "withdraw", "alliance", "behavior", "consumer",
   "domestic", "envelope", "fidelity", "guardian", "identify", "medalist", "occasion", "precious", "security",
   "unlawful", "violence", "announce", "commerce", "daughter", "engineer", "flexible", "gasoline", "historic",
-  "interest", "juvenile", "lighting", "migration", "national", "personal", "relevant", "specific", "vertical",
+  "interest", "juvenile", "lighting",  "national", "personal", "relevant", "specific", "vertical",
   "wideness", "abundant", "breeding", "colossal", "endeavor", "feedback", "glorious", "homeland", "meditate",
-  "opposite", "resource", "situation", "triangle", "upcoming", "vocation", "worrying"],
+  "opposite", "resource", "triangle", "upcoming", "vocation", "worrying"],
 
  "categories": {
-    "animals": ["TIGER", "ZEBRA", "HORSE"],
-    "birds": ["EAGLE", "ROBIN", "SWIFT"],
-    "fruits": ["ORANGE", "BANANA"]
+    "Animals": {
+      "3": ["cat", "dog", "bat"],
+      "4": ["lion", "bear"],
+      "5": ["tiger"],
+      "6": ["monkey"],
+      "7": ["buffalo"],
+      "8": ["elephant"]
+    },
+    "Fruits": {
+      "3": ["fig", "pea"],
+      "4": ["kiwi"]
+    }
   }
 
 

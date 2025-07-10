@@ -46,7 +46,7 @@ class AuthWrapper extends StatelessWidget {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
-            return const MainNavigation();
+            return const MainNavigationPage();
           },
         );
       },
