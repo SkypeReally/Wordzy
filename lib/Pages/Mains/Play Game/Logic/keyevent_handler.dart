@@ -15,23 +15,33 @@ void handlePhysicalKeyEvent({
   final settings = context.read<SettingsProvider>();
   if (!settings.isPhysicalKeyboardEnabled) return;
 
-  final String rawKey = event.logicalKey.keyLabel.trim().toUpperCase();
+  final logicalKey = event.logicalKey;
+  String? key = logicalKey.keyLabel;
 
-  switch (rawKey) {
-    case 'BACKSPACE':
-      onKeyPress('⌫');
-      break;
-    case 'ENTER':
-      onKeyPress('ENTER');
-      break;
-    default:
-      if (RegExp(r'^[A-Z]$').hasMatch(rawKey)) {
-        onKeyPress(rawKey);
-      } else {
-        debugPrint(
-          '❗ Unhandled physical key: "$rawKey" (${event.logicalKey.keyId})',
-        );
-      }
-      break;
+  // Fallback for missing keyLabel when Caps Lock is ON
+  if (key.isEmpty) {
+    // Try using debugName for printable characters (like "Key A")
+    final debugName = logicalKey.debugName ?? '';
+    final match = RegExp(
+      r'^Key ([A-Z])$',
+      caseSensitive: false,
+    ).firstMatch(debugName);
+    if (match != null) {
+      key = match.group(1)!;
+    }
+  }
+
+  key = key.trim().toUpperCase();
+
+  if (key == 'ENTER') {
+    onKeyPress('ENTER');
+  } else if (key == 'BACKSPACE') {
+    onKeyPress('⌫');
+  } else if (RegExp(r'^[A-Z]$').hasMatch(key)) {
+    onKeyPress(key);
+  } else {
+    debugPrint(
+      '❗ Unhandled physical key: "${logicalKey.debugName}" (${logicalKey.keyId})',
+    );
   }
 }

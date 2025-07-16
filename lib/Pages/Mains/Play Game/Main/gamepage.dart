@@ -39,6 +39,7 @@ class _PlayGamePageState extends State<PlayGamePage> {
   @override
   void initState() {
     super.initState();
+    _focusNode.requestFocus();
   }
 
   Future<void> _initController() async {

@@ -44,7 +44,7 @@ void showInstructionsDialog(BuildContext context) {
               label: 'Correct letter in the wrong position',
             ),
             _buildLegendTile(
-              color: const Color.fromARGB(255, 39, 87, 160),
+              color: const Color.fromARGB(255, 51, 136, 233),
               label: 'Letter not in the word',
             ),
           ],

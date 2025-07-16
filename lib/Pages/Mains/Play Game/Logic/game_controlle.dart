@@ -4,6 +4,7 @@ import 'package:gmae_wordle/Authentication/Pages/Log-in Page/Main/sign_in_page.d
 import 'package:gmae_wordle/Game Mechanics/guessrow.dart';
 import 'package:gmae_wordle/Game Mechanics/lettermatch.dart';
 import 'package:gmae_wordle/Daily Word/dialyword_tracker.dart';
+import 'package:gmae_wordle/Instances/fade_message.dart';
 import 'package:gmae_wordle/Provider/category_progress_provider.dart';
 import 'package:gmae_wordle/Provider/setting_provider.dart';
 import 'package:gmae_wordle/Provider/statsprovider.dart';
@@ -128,6 +129,29 @@ class GameController {
     );
   }
 
+  void showCenterFadeMessage(String message) {
+    final overlay = Overlay.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned.fill(
+        child: IgnorePointer(
+          child: Center(
+            child: FadeMessageWidget(
+              message: message,
+              isDarkMode: isDarkMode, // pass this flag
+              onFadeComplete: () => overlayEntry.remove(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+  }
+
   void handleLastFlipDone() {
     debugPrint("🌀 Final tile flip complete. Calling onGameOver...");
     if (!gameOver) {
@@ -204,29 +228,20 @@ class GameController {
       for (int i = length - 1; i >= 0; i--) {
         if (currentGuess[i].isNotEmpty) {
           if (i == hintedIndex) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Hinted tile cannot be deleted.")),
-            );
+            showCenterFadeMessage("Hinted tile cannot be deleted.");
             return;
           }
           currentGuess[i] = '';
           break;
         }
       }
-      // if (settings.isSoundEnabled) SoundService.playClick();
-      // if (settings.isHapticEnabled) VibrationService.vibrate();
       refreshUI();
     } else if (key == 'ENTER') {
       if (currentGuess.where((c) => c.isNotEmpty).length == length) {
         if (_violatesHardModeRules(currentGuess)) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  "You must use known hints correctly in Hard Mode.",
-                ),
-                backgroundColor: Colors.redAccent,
-              ),
+            showCenterFadeMessage(
+              "You must use known hints correctly in Hard Mode.",
             );
           }
           return;
@@ -242,8 +257,6 @@ class GameController {
           break;
         }
       }
-      // if (settings.isSoundEnabled) SoundService.playClick();
-      // if (settings.isHapticEnabled) VibrationService.vibrate();
       refreshUI();
     }
 
@@ -252,7 +265,25 @@ class GameController {
 
   Future<void> _processGuess(SettingsProvider settings, int length) async {
     isFlipping = true;
-    final guessString = currentGuess.join();
+
+    final guessString = currentGuess.join().toUpperCase();
+
+    // Validate word existence in general and category lists
+    final generalList = WordListService.getListForLength(length);
+    final isInGeneralList = generalList.contains(guessString);
+
+    bool isInCategoryList = false;
+    if (category != null) {
+      final categoryList = WordListService.getCategoryWords(category!, length);
+      isInCategoryList = categoryList.contains(guessString);
+    }
+
+    if (!isInGeneralList && !isInCategoryList) {
+      showCenterFadeMessage("Not a valid word.");
+      isFlipping = false;
+      return;
+    }
+
     final evaluated = evaluateGuess(currentGuess, answerWord);
 
     final newRow = Guessrow(
@@ -265,17 +296,15 @@ class GameController {
       ..clear()
       ..addAll(List.filled(length, ''));
 
-    // if (settings.isSoundEnabled) SoundService.playClick();
-    // if (settings.isHapticEnabled) VibrationService.vibrate();
-
     for (int i = 0; i < evaluated.length; i++) {
-      // ✅ Don't update hinted tile color
       if (i == hintedIndex) continue;
 
       final letter = newRow.letters[i];
       final match = newRow.matches[i];
       final existing = keyColors[letter];
-      if (existing == null || match.index > existing.index) {
+
+      if (existing == null ||
+          _matchPriority(match) > _matchPriority(existing)) {
         keyColors[letter] = match;
       }
     }
@@ -296,6 +325,19 @@ class GameController {
 
   void resetHintUsage() {
     hasUsedHint = false;
+  }
+
+  int _matchPriority(LetterMatch match) {
+    switch (match) {
+      case LetterMatch.correct:
+        return 3;
+      case LetterMatch.present:
+        return 2;
+      case LetterMatch.absent:
+        return 1;
+      case LetterMatch.none:
+        return 0; // assign the lowest priority
+    }
   }
 
   Future<void> _endGame(bool won, SettingsProvider settings, int length) async {
@@ -363,14 +405,12 @@ class GameController {
   }
 
   Future<void> useHint() async {
-    if (!context.mounted) return; // ✅ Prevent usage if unmounted
+    if (!context.mounted) return; // Prevent usage if unmounted
 
     final settings = context.read<SettingsProvider>();
 
     if (!settings.hintsEnabled || isDailyMode || settings.hardMode) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Hints aren't allowed in this mode.")),
-      );
+      showCenterFadeMessage("Hints aren't allowed in this mode.");
       return;
     }
 
@@ -403,11 +443,7 @@ class GameController {
       keyColors[letter] = LetterMatch.correct;
       hasUsedHint = true;
       refreshUI();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Hint: '$letter' is correct at position ${i + 1}."),
-        ),
-      );
+      showCenterFadeMessage("Hint: '$letter' is correct at position ${i + 1}.");
       return;
     }
 
@@ -426,11 +462,7 @@ class GameController {
           keyColors[ch] = LetterMatch.present;
           hasUsedHint = true;
           refreshUI();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Hint: '$ch' is in the word (wrong position)."),
-            ),
-          );
+          showCenterFadeMessage("Hint: '$ch' is in the word (wrong position).");
           return;
         }
       }
@@ -449,15 +481,11 @@ class GameController {
       keyColors[ch] = LetterMatch.absent;
       hasUsedHint = true;
       refreshUI();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Hint: '$ch' is not in the word.")),
-      );
+      showCenterFadeMessage("Hint: '$ch' is not in the word.");
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("No more hints available.")));
+    showCenterFadeMessage("No more hints available.");
   }
 
   // Add this method so the UI can get the hinted match for coloring

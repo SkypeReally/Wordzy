@@ -93,20 +93,27 @@ class WordleKeyboard extends StatelessWidget {
           color: _getKeyColor(context, key),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: TextButton(
-          onPressed: () => onKeyPressed(key),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+        child: ExcludeFocus(
+          child: TextButton(
+            onPressed: () => onKeyPressed(key),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+              padding: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
-          ),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              key,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                key,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ),

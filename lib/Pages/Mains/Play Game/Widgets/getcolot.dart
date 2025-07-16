@@ -8,7 +8,7 @@ Color getColorFromMatch(LetterMatch match) {
     case LetterMatch.present:
       return const Color(0xFFC9B458); // yellow
     case LetterMatch.absent:
-      return const Color(0xFF787C7E); // grey
+      return const Color.fromARGB(255, 31, 138, 192); // grey
     case LetterMatch.none:
       return Colors.transparent; // ✅ no veil
   }
