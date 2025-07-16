@@ -9,8 +9,8 @@ import 'package:gmae_wordle/Provider/setting_provider.dart';
 import 'package:gmae_wordle/Provider/statsprovider.dart';
 // import 'package:gmae_wordle/Provider/wordlength_provider.dart';
 import 'package:gmae_wordle/Service/dailyword_service.dart';
-import 'package:gmae_wordle/Service/sound_service.dart';
-import 'package:gmae_wordle/Service/vibration_service.dart';
+// import 'package:gmae_wordle/Service/sound_service.dart';
+// import 'package:gmae_wordle/Service/vibration_service.dart';
 import 'package:gmae_wordle/Service/wordlist.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
@@ -80,8 +80,8 @@ class GameController {
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 if (!context.mounted) return;
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // close dialog
+                Navigator.of(context).pop(); // go back
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => const LoginPage()),
                 );
@@ -107,14 +107,21 @@ class GameController {
         dailyWordLength!,
       );
       if (played) {
+        debugPrint("ℹ️ Daily word already played today.");
         onAlreadyPlayed?.call();
         return;
       }
     }
 
-    await restartGame(); // This will use correct logic
+    await restartGame();
 
-    debugPrint("📋 Mode: ${isDailyMode ? 'Daily' : 'Normal'}");
+    debugPrint(
+      "📋 Mode: ${isDailyMode
+          ? 'Daily'
+          : category != null
+          ? 'Category'
+          : 'Normal'}",
+    );
     debugPrint("📋 Provided dailyWordLength: $dailyWordLength");
     debugPrint(
       "📋 Final word length used: ${isDailyMode ? dailyWordLength : wordLength}",
@@ -122,26 +129,34 @@ class GameController {
   }
 
   void handleLastFlipDone() {
-    if (!gameOver) return;
+    debugPrint("🌀 Final tile flip complete. Calling onGameOver...");
+    if (!gameOver) {
+      debugPrint("⚠️ Skipped onGameOver: gameOver was false!");
+      return;
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) {
-        onGameOver?.call(guesses.last.letters.join() == answerWord, answerWord);
+        final guessedWord = guesses.last.letters.join();
+        final won = guessedWord == answerWord;
+        debugPrint("🎯 Game ended. Won: $won");
+        onGameOver?.call(won, answerWord);
       }
     });
   }
 
   Future<void> restartGame() async {
     hasUsedHint = false;
-
     final int length = isDailyMode ? dailyWordLength! : wordLength;
 
     if (fixedWord != null) {
       answerWord = fixedWord!;
+      debugPrint("🔒 Fixed Word Mode: $answerWord");
     } else if (isDailyMode) {
       answerWord = DailyWordService.getDailyWord(length, DateTime.now());
+      debugPrint("📆 Daily Word Mode [$length]: $answerWord");
     } else if (category != null) {
       final progress = context.read<CategoryProgressProvider>();
-
       final allWords = WordListService.getCategoryWords(category!, length);
       final usedWords = progress.getFoundWords(category!);
       final remainingWords = allWords
@@ -149,15 +164,21 @@ class GameController {
           .toList();
 
       if (remainingWords.isEmpty) {
-        // Optionally notify user if all words are found
         answerWord = allWords[Random().nextInt(allWords.length)];
+        debugPrint(
+          "🏁 Category '$category' - All found. Picking random: $answerWord",
+        );
       } else {
-        answerWord = remainingWords[Random().nextInt(remainingWords.length)];
+        remainingWords.shuffle(); // ✅ shuffle to avoid same word if restart
+        answerWord = remainingWords.first;
+        debugPrint("📚 Category '$category' - Picked new word: $answerWord");
       }
     } else {
       answerWord = await WordListService.getRandomWord(length);
+      debugPrint("🎲 Normal Mode [$length]: $answerWord");
     }
 
+    // Reset game state
     currentGuess
       ..clear()
       ..addAll(List.filled(length, ''));
@@ -166,7 +187,6 @@ class GameController {
     gameOver = false;
     isFlipping = false;
     isWordLoaded = true;
-
     hintedIndex = null;
     hintedMatch = null;
 
@@ -193,8 +213,8 @@ class GameController {
           break;
         }
       }
-      if (settings.isSoundEnabled) SoundService.playClick();
-      if (settings.isHapticEnabled) VibrationService.vibrate();
+      // if (settings.isSoundEnabled) SoundService.playClick();
+      // if (settings.isHapticEnabled) VibrationService.vibrate();
       refreshUI();
     } else if (key == 'ENTER') {
       if (currentGuess.where((c) => c.isNotEmpty).length == length) {
@@ -222,8 +242,8 @@ class GameController {
           break;
         }
       }
-      if (settings.isSoundEnabled) SoundService.playClick();
-      if (settings.isHapticEnabled) VibrationService.vibrate();
+      // if (settings.isSoundEnabled) SoundService.playClick();
+      // if (settings.isHapticEnabled) VibrationService.vibrate();
       refreshUI();
     }
 
@@ -245,8 +265,8 @@ class GameController {
       ..clear()
       ..addAll(List.filled(length, ''));
 
-    if (settings.isSoundEnabled) SoundService.playClick();
-    if (settings.isHapticEnabled) VibrationService.vibrate();
+    // if (settings.isSoundEnabled) SoundService.playClick();
+    // if (settings.isHapticEnabled) VibrationService.vibrate();
 
     for (int i = 0; i < evaluated.length; i++) {
       // ✅ Don't update hinted tile color
@@ -282,29 +302,31 @@ class GameController {
     final stats = context.read<StatsProvider>();
     final guessIndex = guesses.length - 1;
 
+    gameOver = true; // ✅ Must be set BEFORE awaiting
+
     if (isDailyMode && dailyWordLength != null) {
       await stats.updateDailyStats(won: won, guessIndex: guessIndex);
       await DailyWordPlayedTracker().markPlayed(
         DateTime.now(),
         dailyWordLength!,
+        won: won,
       );
+    } else if (category != null) {
+      // ❌ Do not update general stats for category mode
+      // (You can update category-specific stats here if needed)
     } else {
+      // ✅ Only general mode updates general stats
       await stats.incrementGame(won: won, guessCount: guessIndex + 1);
     }
 
-    if (settings.isSoundEnabled) {
-      won ? SoundService.playSuccess() : SoundService.playError();
-    }
-    if (settings.isHapticEnabled) {
-      won ? VibrationService.vibrateSuccess() : VibrationService.vibrateError();
-    }
+    // if (settings.isSoundEnabled) {
+    //   won ? SoundService.playSuccess() : SoundService.playError();
+    // }
+    // if (settings.isHapticEnabled) {
+    //   won ? VibrationService.vibrateSuccess() : VibrationService.vibrateError();
+    // }
 
-    gameOver = true;
-
-    // ❌ REMOVE this — now handled in handleLastFlipDone:
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (context.mounted) onGameOver?.call(won, answerWord);
-    // });
+    // ❌ No direct call to onGameOver here
   }
 
   List<LetterMatch> evaluateGuess(List<String> guess, String answer) {

@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DailyWordPlayedTracker {
-  // ✅ Singleton
   static final DailyWordPlayedTracker _instance =
       DailyWordPlayedTracker._internal();
   factory DailyWordPlayedTracker() => _instance;
@@ -17,24 +16,38 @@ class DailyWordPlayedTracker {
   bool get _isAnonymous =>
       FirebaseAuth.instance.currentUser?.isAnonymous ?? true;
 
-  /// 🔹 Mark word as played for a given date/length
-  Future<void> markPlayed(DateTime date, int wordLength) async {
+  /// 🔹 Mark word as played with result (win or loss)
+  Future<void> markPlayed(
+    DateTime date,
+    int wordLength, {
+    required bool won,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final key = _generateKey(date, wordLength);
-    await prefs.setBool(key, true);
-    await uploadToFirestore(); // Will be skipped if anonymous
+    await prefs.setString(key, won ? 'win' : 'loss');
+    await uploadToFirestore(); // Skips if anonymous
   }
 
-  /// 🔹 Check if word is played
+  /// 🔹 Check if played
   Future<bool> isPlayed(DateTime date, int wordLength) async {
     final prefs = await SharedPreferences.getInstance();
     final key = _generateKey(date, wordLength);
-    return prefs.getBool(key) ?? false;
+    return prefs.containsKey(key);
   }
 
-  /// 🔹 Check today's status
+  /// 🔹 Check today's status (bool only)
   static Future<bool> hasPlayedToday(int wordLength) async {
     return await DailyWordPlayedTracker().isPlayed(DateTime.now(), wordLength);
+  }
+
+  /// 🔹 Get outcome: 'win', 'loss', or null
+  static Future<String?> getOutcomeToday(int wordLength) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = DailyWordPlayedTracker()._generateKey(
+      DateTime.now(),
+      wordLength,
+    );
+    return prefs.getString(key);
   }
 
   /// 🔹 Format: daily_played_5_2025-07-07
@@ -46,11 +59,11 @@ class DailyWordPlayedTracker {
 
   String _twoDigits(int n) => n.toString().padLeft(2, '0');
 
-  /// 🔹 Extract all local played keys
-  Future<Map<String, bool>> getAllPlayedStatus() async {
+  /// 🔹 Get all played outcomes: { '2025-07-15_5': 'win', ... }
+  Future<Map<String, String>> getAllPlayedStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys();
-    final played = <String, bool>{};
+    final played = <String, String>{}; // ✅ Map holds 'win' or 'loss'
 
     for (final key in keys) {
       if (key.startsWith('daily_played_')) {
@@ -58,9 +71,14 @@ class DailyWordPlayedTracker {
         if (parts.length == 4) {
           final wordLength = parts[2];
           final date = parts[3];
-          final firestoreKey = '${date}_$wordLength';
-          if (prefs.getBool(key) == true) {
-            played[firestoreKey] = true;
+
+          final rawValue = prefs.get(key);
+          if (rawValue is String && (rawValue == 'win' || rawValue == 'loss')) {
+            final firestoreKey = '${date}_$wordLength';
+            played[firestoreKey] = rawValue;
+          } else {
+            // Clean up old invalid values (optional, for safety)
+            await prefs.remove(key);
           }
         }
       }
@@ -69,7 +87,7 @@ class DailyWordPlayedTracker {
     return played;
   }
 
-  /// 🔹 Upload local to Firestore
+  /// 🔹 Upload local outcomes to Firestore
   Future<void> uploadToFirestore() async {
     if (_uid == null || _isAnonymous) return;
 
@@ -80,7 +98,7 @@ class DailyWordPlayedTracker {
     }, SetOptions(merge: true));
   }
 
-  /// 🔹 Sync Firestore → local
+  /// 🔹 Sync Firestore → local (for both win/loss)
   Future<void> syncFromFirestore(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
     final cloudMap = doc.data()?['dailyWordPlayed'];
@@ -88,21 +106,20 @@ class DailyWordPlayedTracker {
 
     final prefs = await SharedPreferences.getInstance();
     for (final entry in cloudMap.entries) {
-      if (entry.value != true) continue;
-
       final parts = entry.key.split('_');
-      if (parts.length == 2) {
+      if (parts.length == 2 &&
+          (entry.value == 'win' || entry.value == 'loss')) {
         final dateStr = parts[0];
         final wordLength = int.tryParse(parts[1]);
         if (wordLength != null) {
           final key = 'daily_played_${wordLength}_$dateStr';
-          await prefs.setBool(key, true);
+          await prefs.setString(key, entry.value);
         }
       }
     }
   }
 
-  /// 🔁 Real-time sync
+  /// 🔁 Real-time Firestore listener
   void listenToDailyPlayed() {
     final user = FirebaseAuth.instance.currentUser;
     final uid = user?.uid;
@@ -122,7 +139,7 @@ class DailyWordPlayedTracker {
             if (cloudMap is Map) {
               final prefs = await SharedPreferences.getInstance();
               for (final entry in cloudMap.entries) {
-                if (entry.value != true) continue;
+                if (entry.value != 'win' && entry.value != 'loss') continue;
 
                 final parts = entry.key.split('_');
                 if (parts.length == 2) {
@@ -130,7 +147,7 @@ class DailyWordPlayedTracker {
                   final wordLength = int.tryParse(parts[1]);
                   if (wordLength != null) {
                     final key = 'daily_played_${wordLength}_$dateStr';
-                    await prefs.setBool(key, true);
+                    await prefs.setString(key, entry.value);
                   }
                 }
               }
@@ -144,7 +161,7 @@ class DailyWordPlayedTracker {
         );
   }
 
-  /// ❌ Cancel sync
+  /// ❌ Cancel listener
   void cancelListener() {
     _listener?.cancel();
     _listener = null;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class StatsResetButton extends StatelessWidget {
   final String label;
   final Color backgroundColor;
+  final Color? foregroundColor;
   final VoidCallback onPressed;
 
   const StatsResetButton({
@@ -10,6 +11,7 @@ class StatsResetButton extends StatelessWidget {
     required this.label,
     required this.backgroundColor,
     required this.onPressed,
+    this.foregroundColor,
   });
 
   @override
@@ -26,7 +28,7 @@ class StatsResetButton extends StatelessWidget {
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: backgroundColor,
-            foregroundColor: Colors.white,
+            foregroundColor: foregroundColor ?? Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

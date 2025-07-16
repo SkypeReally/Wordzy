@@ -12,23 +12,23 @@ class DailyWordLengthSelectionPage extends StatefulWidget {
 class _DailyWordLengthSelectionPageState
     extends State<DailyWordLengthSelectionPage> {
   final List<int> wordLengths = [3, 4, 5, 6, 7, 8];
-  Map<int, bool> playedMap = {};
+  Map<int, String?> outcomeMap = {};
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadPlayedStatus();
+    _loadStatus();
   }
 
-  Future<void> _loadPlayedStatus() async {
-    final Map<int, bool> status = {};
+  Future<void> _loadStatus() async {
+    final Map<int, String?> status = {};
     for (final length in wordLengths) {
-      status[length] = await DailyWordPlayedTracker.hasPlayedToday(length);
+      status[length] = await DailyWordPlayedTracker.getOutcomeToday(length);
     }
 
     setState(() {
-      playedMap = status;
+      outcomeMap = status;
       isLoading = false;
     });
   }
@@ -66,23 +66,34 @@ class _DailyWordLengthSelectionPageState
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           children: wordLengths.map((length) {
-            final played = playedMap[length] ?? false;
+            final outcome = outcomeMap[length];
+            Color background;
+            Color foreground;
+            Icon icon;
+
+            if (outcome == 'win') {
+              background = Colors.green.shade600;
+              foreground = Colors.white;
+              icon = const Icon(Icons.check_circle);
+            } else if (outcome == 'loss') {
+              background = Colors.red.shade600;
+              foreground = Colors.white;
+              icon = const Icon(Icons.cancel);
+            } else {
+              background = Theme.of(context).colorScheme.primary;
+              foreground = Colors.white;
+              icon = const Icon(Icons.play_arrow);
+            }
 
             return ElevatedButton.icon(
-              icon: played
-                  ? const Icon(Icons.check_circle_outline, size: 18)
-                  : const Icon(Icons.play_arrow),
+              icon: icon,
               style: ElevatedButton.styleFrom(
-                backgroundColor: played
-                    ? Theme.of(context).colorScheme.secondaryContainer
-                    : Theme.of(context).colorScheme.primary,
-                foregroundColor: played
-                    ? Theme.of(context).colorScheme.onSecondaryContainer
-                    : Colors.white,
+                backgroundColor: background,
+                foregroundColor: foreground,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: () async {
-                if (played) {
+                if (outcome != null) {
                   _showAlreadyPlayedDialog();
                 } else {
                   await Navigator.pushNamed(
@@ -91,8 +102,8 @@ class _DailyWordLengthSelectionPageState
                     arguments: length,
                   );
 
-                  // 🔁 Recheck status when coming back
-                  await _loadPlayedStatus();
+                  // 🔁 Refresh outcome
+                  await _loadStatus();
                 }
               },
               label: Text(

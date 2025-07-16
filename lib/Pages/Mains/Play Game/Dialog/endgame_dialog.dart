@@ -21,12 +21,14 @@ void showEndGameDialog({
       : "😢 You Lost";
 
   final message = won
-      ? "The word was: ${answerWord ?? '???'}"
+      ? "Damn, aren't you coool. The word was: ${answerWord ?? '???'}"
       : isCategory
       ? "Try again with a new word from the \"$category\" category."
       : "The word was: ${answerWord ?? '???'}";
 
-  final tryAgainLabel = isCategory ? "Try Again" : "New Game";
+  final tryAgainLabel = won
+      ? (isCategory ? "Play Again" : "New Game")
+      : (isCategory ? "Try Again" : "Try Again");
 
   showDialog(
     context: context,

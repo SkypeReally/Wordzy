@@ -13,6 +13,10 @@ class SettingsResetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final background = isDark ? Colors.redAccent : theme.colorScheme.error;
+    final foreground = isDark ? Colors.white : theme.colorScheme.onError;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -20,8 +24,8 @@ class SettingsResetButton extends StatelessWidget {
         icon: const Icon(Icons.delete_outline),
         label: Text(label),
         style: ElevatedButton.styleFrom(
-          backgroundColor: theme.colorScheme.error,
-          foregroundColor: theme.colorScheme.onError,
+          backgroundColor: background,
+          foregroundColor: foreground,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

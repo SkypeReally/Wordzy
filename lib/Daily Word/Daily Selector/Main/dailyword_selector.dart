@@ -17,56 +17,55 @@ class DailyWordLengthSelectorPage extends StatefulWidget {
 class _DailyWordLengthSelectorPageState
     extends State<DailyWordLengthSelectorPage> {
   final List<int> wordLengths = [3, 4, 5, 6, 7, 8];
-  Map<int, bool> playedMap = {};
+  Map<int, String?> outcomeMap = {}; // 'win', 'loss', or null
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _checkPlayedStatus();
+    _checkOutcomeStatus();
   }
 
-  Future<void> _checkPlayedStatus() async {
-    final Map<int, bool> result = {};
+  Future<void> _checkOutcomeStatus() async {
+    final Map<int, String?> result = {};
     for (final length in wordLengths) {
-      result[length] = await DailyWordPlayedTracker.hasPlayedToday(length);
+      result[length] = await DailyWordPlayedTracker.getOutcomeToday(
+        length,
+      ); // ✅ use outcome
     }
     setState(() {
-      playedMap = result;
+      outcomeMap = result;
       isLoading = false;
     });
   }
 
   void _handleTileTap(int length) async {
-    final played = playedMap[length] ?? false;
-
-    if (played) {
+    final outcome = outcomeMap[length];
+    if (outcome != null) {
       showAlreadyPlayedDialog(context);
-    } else {
-      final today = DateTime.now();
-
-      // ✅ Load words before accessing
-      await DailyWordService.loadDailyWords();
-
-      final word = DailyWordService.getDailyWord(length, today);
-
-      if (word.isEmpty) {
-        debugPrint("🚫 No daily word for length $length on $today");
-        return;
-      }
-
-      await Navigator.of(context).push(
-        createSlideRoute(
-          PlayGamePage(
-            fixedWord: word,
-            isDailyMode: true,
-            dailyWordLength: length,
-          ),
-        ),
-      );
-
-      await _checkPlayedStatus();
+      return;
     }
+
+    final today = DateTime.now();
+    await DailyWordService.loadDailyWords();
+    final word = DailyWordService.getDailyWord(length, today);
+
+    if (word.isEmpty) {
+      debugPrint("🚫 No daily word for length $length on $today");
+      return;
+    }
+
+    await Navigator.of(context).push(
+      createSlideRoute(
+        PlayGamePage(
+          fixedWord: word,
+          isDailyMode: true,
+          dailyWordLength: length,
+        ),
+      ),
+    );
+
+    await _checkOutcomeStatus(); // 🔄 refresh after game
   }
 
   @override
@@ -84,7 +83,7 @@ class _DailyWordLengthSelectorPageState
         padding: const EdgeInsets.all(24.0),
         child: DailyWordGrid(
           wordLengths: wordLengths,
-          playedMap: playedMap,
+          outcomeMap: outcomeMap, // ✅ pass new map
           onTileTap: _handleTileTap,
         ),
       ),

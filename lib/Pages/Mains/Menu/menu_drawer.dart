@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gmae_wordle/Pages/Drawer/Hard%20Mode/hard_mode.dart';
 import 'package:gmae_wordle/Pages/Drawer/Hints/hint_page.dart';
-import 'package:gmae_wordle/Pages/Drawer/Stats/Archive/archive_page.dart';
-import 'package:gmae_wordle/Pages/Drawer/Stats/Archive/definition_page.dart';
+
 import 'package:gmae_wordle/Pages/Drawer/Streak/streak_page.dart';
 import 'package:gmae_wordle/Pages/Drawer/Support/supprt_page.dart';
 import 'package:provider/provider.dart';
@@ -89,17 +88,6 @@ class MenuDrawer extends StatelessWidget {
             icon: Icons.security,
             label: 'Streak Freeze',
             onTap: () => _navigate(context, const StreakPage()),
-          ),
-          _buildDrawerItem(
-            icon: Icons.list_alt,
-            label: 'Archive',
-            onTap: () => _navigate(context, const ArchivePage()),
-          ),
-          _buildDrawerItem(
-            icon: Icons.menu_book,
-            label: 'Word Definitions',
-            onTap: () =>
-                _navigate(context, const DefinitionPage(word: 'HELLO')),
           ),
 
           _buildDrawerItem(

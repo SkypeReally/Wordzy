@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gmae_wordle/Provider/category_progress_provider.dart';
 import 'package:gmae_wordle/Provider/streak_freeze.dart';
 import 'package:gmae_wordle/Provider/wordlength_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -109,10 +110,20 @@ class AuthService {
       }
 
       try {
-        DailyWordPlayedTracker().cancelListener(); // ensure async wait
+        DailyWordPlayedTracker().cancelListener();
         debugPrint("✅ DailyWordPlayedTracker listener cancelled");
       } catch (e) {
         debugPrint("❌ Error cancelling DailyWordPlayedTracker listener: $e");
+      }
+
+      try {
+        await Provider.of<CategoryProgressProvider>(
+          context,
+          listen: false,
+        ).resetLocalOnly(); // ✅ Do NOT use resetAll()
+        debugPrint("✅ CategoryProgressProvider local cache cleared");
+      } catch (e) {
+        debugPrint("❌ Error clearing CategoryProgressProvider local cache: $e");
       }
 
       // 🔐 Firebase Sign Out

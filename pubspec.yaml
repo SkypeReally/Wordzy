@@ -65,12 +65,21 @@ dev_dependencies:
 flutter:
   assets:
     - assets/word_list.json
+    - assets/category_words.json
 
     - assets/sounds/click.mp3
     - assets/sounds/error.mp3
     - assets/sounds/success.mp3
 
     - assets/pics/google_logo.png
+
+    # Badges Icons
+
+    - assets/pics/badges/bronze_badge.png
+    - assets/pics/badges/silver_badge.png
+    - assets/pics/badges/gold_badge.png
+    - assets/pics/badges/diamond_badge.png
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

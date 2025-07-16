@@ -53,19 +53,33 @@ Widget buildTabTransition({
 /// Widget wrapper to apply bottom nav transition
 class AnimatedTabSwitcher extends StatelessWidget {
   final Widget child;
+  final int currentIndex;
+  final int previousIndex;
 
-  const AnimatedTabSwitcher({super.key, required this.child});
+  const AnimatedTabSwitcher({
+    super.key,
+    required this.child,
+    required this.currentIndex,
+    required this.previousIndex,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Determine the direction of the slide
+    final bool slideFromRight = currentIndex > previousIndex;
+
     return PageTransitionSwitcher(
-      duration: const Duration(milliseconds: 400),
-      transitionBuilder: (child, animation, secondaryAnimation) =>
-          buildTabTransition(
-            child: child,
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-          ),
+      duration: const Duration(milliseconds: 300),
+      reverse: !slideFromRight,
+      transitionBuilder: (child, animation, secondaryAnimation) {
+        const offset = Offset(1.0, 0.0); // from right
+        final tween = Tween<Offset>(
+          begin: slideFromRight ? offset : -offset,
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeInOut));
+
+        return SlideTransition(position: animation.drive(tween), child: child);
+      },
       child: child,
     );
   }

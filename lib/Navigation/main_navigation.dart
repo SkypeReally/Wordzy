@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gmae_wordle/Pages/Category/category_page.dart';
 import 'package:gmae_wordle/Pages/Mains/Daily%20Word/Main/dailyword_page.dart';
-
 import 'package:gmae_wordle/Pages/Mains/Menu/menu_drawer.dart';
-import 'package:gmae_wordle/Pages/Mains/Menu/menu_page.dart'; // ✅ Your Drawer
+import 'package:gmae_wordle/Pages/Mains/Menu/menu_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -24,16 +23,21 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
-    _pageController.jumpToPage(index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(), // ✅ Add this here!
+      drawer: const MenuDrawer(),
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) => setState(() => _selectedIndex = index),
+        physics: const BouncingScrollPhysics(), // Optional: smoother swiping
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(

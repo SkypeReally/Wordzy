@@ -21,6 +21,10 @@ class DailyStatsView extends StatelessWidget {
     final best = stats.maxStreak;
     final distribution = stats.dailyGuessDistribution;
 
+    final isDark = theme.brightness == Brightness.dark;
+    final background = isDark ? Colors.redAccent : theme.colorScheme.error;
+    final foreground = isDark ? Colors.white : theme.colorScheme.onError;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -42,7 +46,8 @@ class DailyStatsView extends StatelessWidget {
             const SizedBox(height: 32),
             StatsResetButton(
               label: "Reset Daily Stats",
-              backgroundColor: theme.colorScheme.error,
+              backgroundColor: background,
+              foregroundColor: foreground,
               onPressed: () async {
                 final confirm = await showConfirmDialog(
                   context: context,
@@ -50,7 +55,7 @@ class DailyStatsView extends StatelessWidget {
                   message: "Are you sure you want to reset your daily stats?",
                   icon: Icons.warning,
                   confirmText: "Reset",
-                  confirmColor: theme.colorScheme.error,
+                  confirmColor: background,
                 );
                 if (confirm == true) {
                   context.read<StatsProvider>().resetDailyStats();

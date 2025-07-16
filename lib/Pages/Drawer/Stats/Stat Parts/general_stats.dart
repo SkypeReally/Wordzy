@@ -12,6 +12,7 @@ class GeneralStatsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final stats = context.watch<StatsProvider>();
 
     final played = stats.totalGamesPlayed;
@@ -42,7 +43,12 @@ class GeneralStatsView extends StatelessWidget {
             const SizedBox(height: 32),
             StatsResetButton(
               label: "Reset General Stats",
-              backgroundColor: theme.colorScheme.error,
+              backgroundColor: isDark
+                  ? Colors.redAccent
+                  : theme.colorScheme.error,
+              foregroundColor: isDark
+                  ? Colors.white
+                  : theme.colorScheme.onError,
               onPressed: () async {
                 final confirm = await showConfirmDialog(
                   context: context,

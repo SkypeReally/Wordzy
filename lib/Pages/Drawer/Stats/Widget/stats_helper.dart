@@ -20,7 +20,7 @@ Future<bool?> showConfirmDialog({
   IconData? icon,
   String cancelText = "Cancel",
   String confirmText = "Confirm",
-  Color confirmColor = Colors.red,
+  Color confirmColor = const Color.fromARGB(255, 161, 8, 8),
 }) {
   return showDialog<bool>(
     context: context,

@@ -56,7 +56,9 @@ class GuessRowWidget extends StatelessWidget {
                     size: size,
                     onCompleted: isLastTile && isLastGuessRow
                         ? onFlipComplete
-                        : null, // ✅ Trigger only on final tile of final row
+                        : null,
+
+                    // ✅ Trigger only on final tile of final row
                   )
                 : Container(
                     decoration: BoxDecoration(

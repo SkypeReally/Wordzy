@@ -98,22 +98,9 @@
   "unlawful", "violence", "announce", "commerce", "daughter", "engineer", "flexible", "gasoline", "historic",
   "interest", "juvenile", "lighting",  "national", "personal", "relevant", "specific", "vertical",
   "wideness", "abundant", "breeding", "colossal", "endeavor", "feedback", "glorious", "homeland", "meditate",
-  "opposite", "resource", "triangle", "upcoming", "vocation", "worrying"],
+  "opposite", "resource", "triangle", "upcoming", "vocation", "worrying"]
 
- "categories": {
-    "Animals": {
-      "3": ["cat", "dog", "bat"],
-      "4": ["lion", "bear"],
-      "5": ["tiger"],
-      "6": ["monkey"],
-      "7": ["buffalo"],
-      "8": ["elephant"]
-    },
-    "Fruits": {
-      "3": ["fig", "pea"],
-      "4": ["kiwi"]
-    }
-  }
+ 
 
 
 

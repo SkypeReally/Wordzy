@@ -1,4 +1,3 @@
-// import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gmae_wordle/Pages/Mains/Play%20Game/Main/gamepage.dart';
 import 'package:gmae_wordle/Provider/category_progress_provider.dart';
@@ -28,7 +27,6 @@ class CategoriesPage extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 final category = categories[index];
-                final icon = _getIconForCategory(category);
 
                 return InkWell(
                   borderRadius: BorderRadius.circular(16),
@@ -66,37 +64,73 @@ class CategoriesPage extends StatelessWidget {
                       );
                     }
                   },
+                  child: Consumer<CategoryProgressProvider>(
+                    builder: (context, progressProvider, _) {
+                      final progress = progressProvider.getCategoryProgress(
+                        category,
+                      );
+                      final isComplete = progress >= 1.0;
+                      final badgePath = _badgeIconPathFor(progress);
+                      final foundCount = progressProvider.getFoundCount(
+                        category,
+                      );
+                      final totalCount = WordListService.getWordsFromCategory(
+                        category,
+                      ).length;
 
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isComplete
+                              ? Colors.green.withOpacity(0.15)
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(16),
+                          border: isComplete
+                              ? Border.all(color: Colors.green, width: 2)
+                              : null,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          icon,
-                          size: 36,
-                          color: Theme.of(context).colorScheme.primary,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Tooltip(
+                              message: '${(progress * 100).toInt()}% complete',
+                              child: Image.asset(
+                                badgePath,
+                                width: 36,
+                                height: 36,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "$foundCount / $totalCount",
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              category[0].toUpperCase() + category.substring(1),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          category[0].toUpperCase() + category.substring(1),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 );
               },
@@ -104,21 +138,13 @@ class CategoriesPage extends StatelessWidget {
     );
   }
 
-  IconData _getIconForCategory(String category) {
-    switch (category.toLowerCase()) {
-      case 'animals':
-        return Icons.pets;
-      case 'birds':
-        return Icons.filter_hdr;
-      case 'fruits':
-        return Icons.apple;
-      case 'countries':
-        return Icons.public;
-      case 'colors':
-        return Icons.palette;
-      default:
-        return Icons.category;
-    }
+  /// Returns local asset path of badge based on progress
+  String _badgeIconPathFor(double progress) {
+    if (progress >= 1.0) return 'assets/pics/badges/diamond_badge.png';
+    if (progress >= 0.75) return 'assets/pics/badges/gold_badge.png';
+    if (progress >= 0.5) return 'assets/pics/badges/silver_badge.png';
+    if (progress > 0.0) return 'assets/pics/badges/bronze_badge.png';
+    return 'assets/pics/badges/bronze_badge.png'; // default fallback
   }
 
   void _showError(BuildContext context, String message) {

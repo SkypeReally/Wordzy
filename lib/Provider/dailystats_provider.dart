@@ -26,7 +26,10 @@ class DailyStatsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateStats({required bool won, required int guessIndex}) async {
+  Future<void> updateDailyStats({
+    required bool won,
+    required int guessIndex,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
 
     totalGamesPlayed++;
