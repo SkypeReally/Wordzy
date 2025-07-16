@@ -106,7 +106,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: InkWell(
                             //let's see
                             borderRadius: BorderRadius.circular(10),
-                            onTap: hasChanged
+                            onTap:
+                                hasChanged //dsadd
                                 ? () {
                                     settings.setDisplayName(typedName);
                                     FocusScope.of(context).unfocus();
