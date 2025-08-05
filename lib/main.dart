@@ -18,14 +18,12 @@ import 'package:gmae_wordle/Provider/category_progress_provider.dart';
 import 'package:gmae_wordle/Preferences/theme_data.dart';
 import 'package:gmae_wordle/Util/firebase_options.dart';
 
-/// ✅ Global navigator key (used by dialogs/snackbars/etc.)
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // ✅ Initialize essential providers before runApp
   final settingsProvider = SettingsProvider();
   await settingsProvider.loadSettings();
 
@@ -47,9 +45,7 @@ void main() async {
             ChangeNotifierProvider(create: (_) => DailyStatsProvider()),
             ChangeNotifierProvider(create: (_) => StreakFreezeProvider()),
             ChangeNotifierProvider.value(value: settingsProvider),
-            ChangeNotifierProvider.value(
-              value: categoryProgressProvider,
-            ), // ✅ Added here
+            ChangeNotifierProvider.value(value: categoryProgressProvider),
           ],
           child: const MyApp(),
         );
