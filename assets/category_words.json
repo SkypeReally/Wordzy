@@ -9,14 +9,9 @@
 },
 
   "Fruits": {
-    "3": ["Fig", "Nut", "Plum"],
-    "4": ["Lime", "Pear", "Kiwi"],
-    "5": ["Apple", "Mango", "Grape", "Pears", "Plums"],
-    "6": ["Banana", "Tomato", "Cherry", "Papaya", "Orange"],
-    "7": ["Avocado",  "Peaches"],
-    "8": ["Cantalou"]
-},
-
+    "3": ["Fig", "Nut", "Plum"]
+   
+  },
 
 
   "Birds": {
