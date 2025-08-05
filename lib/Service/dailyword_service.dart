@@ -7,12 +7,11 @@ class DailyWordService {
   static Map<int, List<String>> _wordMap = {};
   static bool _isLoaded = false;
 
-  /// Loads daily words from assets/word_list.json.
-  /// This is called once and cached.
   static Future<void> loadDailyWords() async {
     if (_isLoaded) return;
 
     try {
+      //words loaded from local word list
       final data = await rootBundle.loadString('assets/word_list.json');
       final Map<String, dynamic> json = jsonDecode(data);
 
@@ -30,7 +29,6 @@ class DailyWordService {
     }
   }
 
-  /// Returns the daily word for a given length and date
   static String getDailyWord(int wordLength, DateTime date) {
     final words = _wordMap[wordLength] ?? [];
     if (words.isEmpty) {
