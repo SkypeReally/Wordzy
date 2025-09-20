@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class DailyWordTile extends StatelessWidget {
   final int wordLength;
-  final String? outcome; // 'win', 'loss', or null
+  final String? outcome;
   final VoidCallback onTap;
 
   const DailyWordTile({
@@ -30,7 +30,6 @@ class DailyWordTile extends StatelessWidget {
       icon = const Icon(Icons.check_circle, color: Colors.white, size: 20);
     } else if (isLoss) {
       backgroundColor = Colors.redAccent.shade200;
-      // 🔴 Loss = red
       textColor = Colors.white;
       icon = null;
     } else {

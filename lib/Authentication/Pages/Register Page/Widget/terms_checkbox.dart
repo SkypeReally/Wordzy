@@ -31,7 +31,7 @@ class TermsCheckbox extends StatelessWidget {
               style: const TextStyle(
                 color: Colors.blue,
                 fontWeight: FontWeight.w600,
-                decoration: TextDecoration.none, // 🔒 no underline
+                decoration: TextDecoration.none,
               ),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {

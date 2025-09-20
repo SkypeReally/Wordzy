@@ -51,10 +51,9 @@ class _FadeMessageWidgetState extends State<FadeMessageWidget>
 
   @override
   Widget build(BuildContext context) {
-    // Colors based on theme mode
     final backgroundColor = widget.isDarkMode
-        ? const Color.fromARGB(217, 12, 11, 11) // approx 85% opacity blackish
-        : const Color.fromARGB(206, 196, 191, 191); // approx 70% opacity white
+        ? const Color.fromARGB(217, 12, 11, 11)
+        : const Color.fromARGB(206, 196, 191, 191);
 
     final textColor = widget.isDarkMode
         ? const Color.fromARGB(255, 255, 255, 255)
@@ -67,8 +66,8 @@ class _FadeMessageWidgetState extends State<FadeMessageWidget>
         borderRadius: BorderRadius.circular(8),
 
         child: SizedBox(
-          width: 335, // increase width as needed
-          height: 80, // increase height as needed
+          width: 335,
+          height: 80,
           child: Center(
             child: Text(
               widget.message,

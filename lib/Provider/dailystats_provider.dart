@@ -6,7 +6,7 @@ class DailyStatsProvider with ChangeNotifier {
   int totalWins = 0;
   int currentStreak = 0;
   int bestStreak = 0;
-  List<int> guessDistribution = List.filled(6, 0); // Index 0 → 1st guess
+  List<int> guessDistribution = List.filled(6, 0);
 
   double get winPercentage =>
       totalGamesPlayed == 0 ? 0 : (totalWins / totalGamesPlayed) * 100;

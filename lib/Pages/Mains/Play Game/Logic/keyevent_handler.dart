@@ -18,9 +18,7 @@ void handlePhysicalKeyEvent({
   final logicalKey = event.logicalKey;
   String? key = logicalKey.keyLabel;
 
-  // Fallback for missing keyLabel when Caps Lock is ON
   if (key.isEmpty) {
-    // Try using debugName for printable characters (like "Key A")
     final debugName = logicalKey.debugName ?? '';
     final match = RegExp(
       r'^Key ([A-Z])$',

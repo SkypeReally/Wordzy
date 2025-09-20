@@ -15,7 +15,7 @@ class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
 
   ThemeProvider() {
-    _loadTheme(); // load theme from SharedPreferences
+    _loadTheme();
   }
 
   Future<void> _loadTheme() async {
@@ -23,10 +23,8 @@ class ThemeProvider extends ChangeNotifier {
     final themeString = prefs.getString(_themeKey);
 
     if (themeString != null) {
-      // User has previously selected a theme
       _themeMode = _parseThemeMode(themeString);
     } else {
-      // First launch, use system
       _themeMode = ThemeMode.system;
     }
 

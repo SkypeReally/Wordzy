@@ -32,12 +32,9 @@ class SettingsProvider extends ChangeNotifier {
 
   SettingsProvider();
 
-  /// Loads settings from local prefs and cloud (if user logged in),
-  /// and starts Firestore listener.
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Load local prefs first
     hintsEnabled = prefs.getBool('hintsEnabled') ?? false;
     isHapticEnabled = prefs.getBool('isHapticEnabled') ?? true;
     isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
@@ -62,10 +59,8 @@ class SettingsProvider extends ChangeNotifier {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && !user.isAnonymous) {
       debugPrint("🟢 [SettingsProvider] Loading settings from Firestore...");
-      // Load once from Firestore and apply
       await _loadFromCloudOnce();
 
-      // Start real-time listener after initial load
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _initRealTimeSync();
       });
@@ -75,7 +70,6 @@ class SettingsProvider extends ChangeNotifier {
       );
     }
 
-    // Mark loaded after local + cloud
     _isLoaded = true;
     notifyListeners();
   }
@@ -185,7 +179,6 @@ class SettingsProvider extends ChangeNotifier {
       if (defaultWordLength != newLength) {
         defaultWordLength = newLength;
 
-        // ✅ Update WordLengthProvider if context is available
         final context = navigatorKey.currentContext;
         if (context != null) {
           try {

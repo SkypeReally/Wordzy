@@ -56,7 +56,6 @@ class _DailyWordPageState extends State<DailyWordPage> {
               const DailyTitleSection(),
               const SizedBox(height: 16),
 
-              // Card Container
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -64,7 +63,7 @@ class _DailyWordPageState extends State<DailyWordPage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0x1A000000), // Black at 10% opacity
+                      color: const Color(0x1A000000),
 
                       blurRadius: 8,
                       offset: const Offset(0, 4),

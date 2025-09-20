@@ -13,7 +13,6 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
-  /// 🔵 Google Sign-In
   Future<UserCredential?> signInWithGoogle(BuildContext context) async {
     try {
       final googleUser = await _googleSignIn.signIn();
@@ -44,12 +43,10 @@ class AuthService {
     }
   }
 
-  /// 🟡 Email Login
   Future<UserCredential> signInWithEmail(String email, String password) {
     return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  /// 🟢 Anonymous Login
   Future<UserCredential> signInAnonymously(BuildContext context) async {
     final credential = await _auth.signInAnonymously();
 
@@ -59,12 +56,10 @@ class AuthService {
     return credential;
   }
 
-  /// 🔴 Sign Out Flow
-  /// 🔴 Sign Out Flow
   Future<void> signOut(BuildContext context) async {
     debugPrint("🚪 Starting sign out process...");
 
-    await Future.delayed(Duration.zero); // context safety
+    await Future.delayed(Duration.zero);
 
     try {
       debugPrint("🔁 Cancelling Firestore listeners...");
@@ -120,13 +115,12 @@ class AuthService {
         await Provider.of<CategoryProgressProvider>(
           context,
           listen: false,
-        ).resetLocalOnly(); // ✅ Do NOT use resetAll()
+        ).resetLocalOnly();
         debugPrint("✅ CategoryProgressProvider local cache cleared");
       } catch (e) {
         debugPrint("❌ Error clearing CategoryProgressProvider local cache: $e");
       }
 
-      // 🔐 Firebase Sign Out
       try {
         debugPrint("🔐 Signing out from Firebase...");
         await _auth.signOut();
@@ -135,7 +129,6 @@ class AuthService {
         debugPrint("❌ Firebase sign-out error: $e");
       }
 
-      // 🔐 Google Sign Out
       try {
         debugPrint("🔐 Signing out from Google...");
         await _googleSignIn.signOut();

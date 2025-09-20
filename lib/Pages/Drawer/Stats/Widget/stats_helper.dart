@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Builds a styled section title using the current theme.
 Widget buildSectionTitle(BuildContext context, String title) {
   final theme = Theme.of(context);
   return Padding(
@@ -12,7 +11,6 @@ Widget buildSectionTitle(BuildContext context, String title) {
   );
 }
 
-/// Shows a reusable confirmation dialog for any action.
 Future<bool?> showConfirmDialog({
   required BuildContext context,
   required String title,

@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WordLengthProvider with ChangeNotifier {
-  int? _wordLength; // nullable until initialized
+  int? _wordLength;
   bool _isInitialized = false;
 
   StreamSubscription<DocumentSnapshot>? _subscription;
@@ -21,7 +21,6 @@ class WordLengthProvider with ChangeNotifier {
 
   WordLengthProvider();
 
-  /// Call this on startup to load from local prefs + cloud
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -32,7 +31,6 @@ class WordLengthProvider with ChangeNotifier {
       _wordLength = localLength;
       debugPrint("🟢 [WordLengthProvider] Loaded from prefs: $localLength");
     } else {
-      // Fallback default
       _wordLength = 5;
       debugPrint("🟡 [WordLengthProvider] No prefs found, using default: 5");
     }

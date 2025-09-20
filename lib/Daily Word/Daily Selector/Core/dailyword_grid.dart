@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gmae_wordle/Daily%20Word/Daily%20Selector/Core/dailyword_tile.dart';
 
 class DailyWordGrid extends StatelessWidget {
-  final Map<int, String?> outcomeMap; // ✅ win, loss, or null
+  final Map<int, String?> outcomeMap;
   final List<int> wordLengths;
   final void Function(int length) onTileTap;
 
@@ -22,7 +22,7 @@ class DailyWordGrid extends StatelessWidget {
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       children: wordLengths.map((length) {
-        final outcome = outcomeMap[length]; // ✅ 'win', 'loss', or null
+        final outcome = outcomeMap[length];
         return DailyWordTile(
           wordLength: length,
           outcome: outcome,

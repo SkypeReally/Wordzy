@@ -13,11 +13,10 @@ class WordGrid extends StatelessWidget {
       builder: (context, constraints) {
         const double spacing = 8.0;
         final double totalSpacing = spacing * (wordLength - 1);
-        final double availableWidth =
-            constraints.maxWidth - 32; // 16 padding each side
+        final double availableWidth = constraints.maxWidth - 32;
         double tileSize = (availableWidth - totalSpacing) / wordLength;
 
-        tileSize = tileSize.clamp(36.0, 56.0); // Prevent too small/large
+        tileSize = tileSize.clamp(36.0, 56.0);
 
         return Column(
           mainAxisSize: MainAxisSize.min,

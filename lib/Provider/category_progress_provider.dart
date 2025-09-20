@@ -15,10 +15,10 @@ class CategoryProgressProvider extends ChangeNotifier {
     if (_initialized) return;
 
     _prefs = await SharedPreferences.getInstance();
-    _loadFromLocal(); // ✅ Load local cache
+    _loadFromLocal();
 
-    await _mergeFromFirestore(); // 🔁 Merge Firestore into local
-    _saveToLocal(); // 💾 Save merged result locally
+    await _mergeFromFirestore();
+    _saveToLocal();
 
     _initialized = true;
     notifyListeners();
@@ -49,7 +49,7 @@ class CategoryProgressProvider extends ChangeNotifier {
         });
       }
 
-      await _saveToFirestore(); // 🆙 Push merged data to Firestore
+      await _saveToFirestore();
     } catch (e) {
       debugPrint('❌ Error loading category progress from Firestore: $e');
     }

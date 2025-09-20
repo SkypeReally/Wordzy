@@ -15,7 +15,6 @@ class TileGrid extends StatelessWidget {
   final Color Function(LetterMatch match) getColorFromMatch;
   final GameController controller;
 
-  /// ✅ Optional callback for when final flip is complete (used to delay Game Over dialog)
   final VoidCallback? onFlipComplete;
 
   const TileGrid({
@@ -59,10 +58,9 @@ class TileGrid extends StatelessWidget {
                 spacing: spacing,
                 isTileAnimationEnabled: isTileAnimationEnabled,
                 getColorFromMatch: getColorFromMatch,
-                isLastGuessRow: row == guesses.length - 1, // ✅ NEW
+                isLastGuessRow: row == guesses.length - 1,
                 onFlipComplete: row == guesses.length - 1
-                    ? controller
-                          .handleLastFlipDone // ✅ NEW
+                    ? controller.handleLastFlipDone
                     : null,
               );
             } else if (row == guesses.length) {

@@ -49,7 +49,7 @@ class HintsPage extends StatelessWidget {
             SwitchListTile(
               value: settings.hintsEnabled,
               onChanged: settings.hardMode
-                  ? null // ❌ Disabled in hard mode
+                  ? null
                   : (enabled) => settings.setHintsEnabled(enabled),
               title: const Text("Enable Hints"),
               subtitle: Text(

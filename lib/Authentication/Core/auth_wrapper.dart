@@ -26,21 +26,15 @@ class AuthWrapper extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // ❌ User not signed in or is anonymous → show LoginPage
         if (user == null) {
-          // 🔴 Cleanup on logout
           WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<StatsProvider>().cancelCloudListener();
             DailyWordPlayedTracker().cancelListener();
-
-            // ❌ Do NOT clear CategoryProgressProvider here anymore
-            // ❌ Removed: resetLocalOnly or resetAll
           });
 
           return const LoginPage();
         }
 
-        // ✅ Fully signed-in user → initialize data and show MainNavigation
         return FutureBuilder(
           future: _initializeUserData(context, user),
           builder: (context, snapshot) {
@@ -60,7 +54,6 @@ class AuthWrapper extends StatelessWidget {
     final categoryProgressProvider = context.read<CategoryProgressProvider>();
     final dailyTracker = DailyWordPlayedTracker();
 
-    // 🧩 Load all data in parallel
     await Future.wait([
       settingsProvider.loadSettings(),
       statsProvider.loadStatsFromCloud(),
@@ -68,7 +61,6 @@ class AuthWrapper extends StatelessWidget {
       dailyTracker.syncFromFirestore(user.uid),
     ]);
 
-    // 🎧 Start real-time listeners after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       statsProvider.listenToCloudStats();
       dailyTracker.listenToDailyPlayed();

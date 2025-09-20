@@ -81,8 +81,8 @@ class GameController {
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 if (!context.mounted) return;
-                Navigator.of(context).pop(); // close dialog
-                Navigator.of(context).pop(); // go back
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => const LoginPage()),
                 );
@@ -141,7 +141,7 @@ class GameController {
           child: Center(
             child: FadeMessageWidget(
               message: message,
-              isDarkMode: isDarkMode, // pass this flag
+              isDarkMode: isDarkMode,
               onFadeComplete: () => overlayEntry.remove(),
             ),
           ),
@@ -193,7 +193,7 @@ class GameController {
           "🏁 Category '$category' - All found. Picking random: $answerWord",
         );
       } else {
-        remainingWords.shuffle(); // ✅ shuffle to avoid same word if restart
+        remainingWords.shuffle();
         answerWord = remainingWords.first;
         debugPrint("📚 Category '$category' - Picked new word: $answerWord");
       }
@@ -202,7 +202,6 @@ class GameController {
       debugPrint("🎲 Normal Mode [$length]: $answerWord");
     }
 
-    // Reset game state
     currentGuess
       ..clear()
       ..addAll(List.filled(length, ''));
@@ -268,7 +267,6 @@ class GameController {
 
     final guessString = currentGuess.join().toUpperCase();
 
-    // Validate word existence in general and category lists
     final generalList = WordListService.getListForLength(length);
     final isInGeneralList = generalList.contains(guessString);
 
@@ -336,7 +334,7 @@ class GameController {
       case LetterMatch.absent:
         return 1;
       case LetterMatch.none:
-        return 0; // assign the lowest priority
+        return 0;
     }
   }
 
@@ -344,7 +342,7 @@ class GameController {
     final stats = context.read<StatsProvider>();
     final guessIndex = guesses.length - 1;
 
-    gameOver = true; // ✅ Must be set BEFORE awaiting
+    gameOver = true;
 
     if (isDailyMode && dailyWordLength != null) {
       await stats.updateDailyStats(won: won, guessIndex: guessIndex);
@@ -354,10 +352,7 @@ class GameController {
         won: won,
       );
     } else if (category != null) {
-      // ❌ Do not update general stats for category mode
-      // (You can update category-specific stats here if needed)
     } else {
-      // ✅ Only general mode updates general stats
       await stats.incrementGame(won: won, guessCount: guessIndex + 1);
     }
 
@@ -367,19 +362,16 @@ class GameController {
     // if (settings.isHapticEnabled) {
     //   won ? VibrationService.vibrateSuccess() : VibrationService.vibrateError();
     // }
-
-    // ❌ No direct call to onGameOver here
   }
 
   List<LetterMatch> evaluateGuess(List<String> guess, String answer) {
     List<LetterMatch> result = List.filled(guess.length, LetterMatch.absent);
     List<bool> taken = List.filled(answer.length, false);
 
-    // ✅ First pass: green (correct)
     for (int i = 0; i < guess.length; i++) {
       if (i == hintedIndex) {
-        result[i] = hintedMatch!; // ✅ Use stored match
-        taken[i] = true; // ✅ Mark taken
+        result[i] = hintedMatch!;
+        taken[i] = true;
         continue;
       }
 
@@ -389,7 +381,6 @@ class GameController {
       }
     }
 
-    // ✅ Second pass: yellow
     for (int i = 0; i < guess.length; i++) {
       if (result[i] == LetterMatch.correct) continue;
       for (int j = 0; j < answer.length; j++) {
@@ -405,7 +396,7 @@ class GameController {
   }
 
   Future<void> useHint() async {
-    if (!context.mounted) return; // Prevent usage if unmounted
+    if (!context.mounted) return;
 
     final settings = context.read<SettingsProvider>();
 
@@ -427,7 +418,6 @@ class GameController {
       }
     }
 
-    // Green Hint
     final greenOptions = <int>[];
     for (int i = 0; i < answerLetters.length; i++) {
       if (knownCorrect[i] == null && currentGuess[i].isEmpty) {
@@ -447,7 +437,6 @@ class GameController {
       return;
     }
 
-    // Yellow Hint
     for (int i = 0; i < answerLetters.length; i++) {
       final ch = answerLetters[i];
       if (knownCorrect.contains(ch)) continue;
@@ -468,7 +457,6 @@ class GameController {
       }
     }
 
-    // Grey Hint
     final unusedGreys = <String>[];
     for (var i = 0; i < 26; i++) {
       final ch = String.fromCharCode(65 + i);
@@ -488,7 +476,6 @@ class GameController {
     showCenterFadeMessage("No more hints available.");
   }
 
-  // Add this method so the UI can get the hinted match for coloring
   LetterMatch? getHintedMatch(int index) {
     return index == hintedIndex ? hintedMatch : null;
   }

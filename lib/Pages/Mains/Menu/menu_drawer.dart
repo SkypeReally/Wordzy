@@ -30,7 +30,6 @@ class MenuDrawer extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // Theme Toggle
                 Positioned(
                   top: 23,
                   right: 32,
@@ -72,7 +71,6 @@ class MenuDrawer extends StatelessWidget {
             ),
           ),
 
-          // 🧠 Secondary Features
           _buildDrawerItem(
             icon: Icons.tips_and_updates,
             label: 'Hints',
@@ -98,7 +96,6 @@ class MenuDrawer extends StatelessWidget {
 
           const Divider(),
 
-          // ⚙️ Settings and Support
           _buildDrawerItem(
             icon: Icons.settings,
             label: 'Settings',

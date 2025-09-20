@@ -5,7 +5,6 @@ class ArchivePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Replace this with your actual list of played daily words
     final List<DailyWordEntry> archiveList = [
       DailyWordEntry(
         date: DateTime(2025, 7, 6),
@@ -45,7 +44,6 @@ class ArchivePage extends StatelessWidget {
             subtitle: Text(_formatDate(entry.date)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // TODO: Show definition or summary
               showDialog(
                 context: context,
                 builder: (_) => AlertDialog(

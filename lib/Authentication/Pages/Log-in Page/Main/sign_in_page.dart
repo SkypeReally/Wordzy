@@ -46,7 +46,6 @@ class _LoginPageState extends State<LoginPage> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      // No need for display name or snackbar here — AuthWrapper handles it.
     } on FirebaseAuthException catch (e) {
       setState(() => error = e.message);
     } catch (e) {
@@ -65,7 +64,6 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await _authService.signInWithGoogle(context);
-      // AuthWrapper handles display name sync and cloud sync
     } on FirebaseAuthException catch (e) {
       setState(() => error = e.message);
     } catch (e) {
@@ -85,7 +83,6 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await _authService.signInAnonymously(context);
-      // Display name is handled in AuthService and synced in AuthWrapper
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() => error = e.message);

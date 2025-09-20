@@ -11,7 +11,7 @@ class DelayedSlidePage extends StatefulWidget {
     required this.child,
     this.delay = const Duration(milliseconds: 130),
     this.duration = const Duration(milliseconds: 400),
-    this.beginOffset = const Offset(1.0, 0), // slide in from right by default
+    this.beginOffset = const Offset(1.0, 0),
   });
 
   @override

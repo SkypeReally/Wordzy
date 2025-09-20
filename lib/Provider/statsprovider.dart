@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StatsProvider with ChangeNotifier {
-  // 🔵 General Stats
+  //  General Stats
   int totalGamesPlayed = 0;
   int totalWins = 0;
   double winPercentage = 0.0;
@@ -13,7 +13,7 @@ class StatsProvider with ChangeNotifier {
   int _maxStreak = 0;
   List<int> guessDistribution = List.filled(6, 0);
 
-  // 🟡 Daily Stats
+  // Daily Stats
   int dailyGamesPlayed = 0;
   int dailyWins = 0;
   double dailyWinPercentage = 0.0;
@@ -21,7 +21,6 @@ class StatsProvider with ChangeNotifier {
   int _dailyMaxStreak = 0;
   List<int> dailyGuessDistribution = List.filled(6, 0);
 
-  // 🔁 Firestore listener
   StreamSubscription<DocumentSnapshot>? _statsSubscription;
 
   StatsProvider() {
@@ -34,7 +33,6 @@ class StatsProvider with ChangeNotifier {
   Future<void> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // 🔵 General
     totalGamesPlayed = prefs.getInt('totalGames') ?? 0;
     totalWins = prefs.getInt('totalWins') ?? 0;
     currentStreak = prefs.getInt('currentStreak') ?? 0;
@@ -46,7 +44,6 @@ class StatsProvider with ChangeNotifier {
       guessDistribution[i] = prefs.getInt('guessDist_$i') ?? 0;
     }
 
-    // 🟡 Daily
     dailyGamesPlayed = prefs.getInt('daily_totalGames') ?? 0;
     dailyWins = prefs.getInt('daily_totalWins') ?? 0;
     dailyCurrentStreak = prefs.getInt('daily_currentStreak') ?? 0;
@@ -68,7 +65,6 @@ class StatsProvider with ChangeNotifier {
 
   Future<void> saveStatsToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    // 🔵 General
     await prefs.setInt('totalGames', totalGamesPlayed);
     await prefs.setInt('totalWins', totalWins);
     await prefs.setInt('currentStreak', currentStreak);
@@ -77,7 +73,6 @@ class StatsProvider with ChangeNotifier {
       await prefs.setInt('guessDist_$i', guessDistribution[i]);
     }
 
-    // 🟡 Daily
     await prefs.setInt('daily_totalGames', dailyGamesPlayed);
     await prefs.setInt('daily_totalWins', dailyWins);
     await prefs.setInt('daily_currentStreak', dailyCurrentStreak);

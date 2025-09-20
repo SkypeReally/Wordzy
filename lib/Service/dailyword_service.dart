@@ -11,7 +11,6 @@ class DailyWordService {
     if (_isLoaded) return;
 
     try {
-      //words loaded from local word list
       final data = await rootBundle.loadString('assets/word_list.json');
       final Map<String, dynamic> json = jsonDecode(data);
 

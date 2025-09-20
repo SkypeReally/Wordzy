@@ -7,7 +7,7 @@ class FlipTile extends StatefulWidget {
   final LetterMatch match;
   final Duration delay;
   final double size;
-  final VoidCallback? onCompleted; // ✅ NEW
+  final VoidCallback? onCompleted;
 
   const FlipTile({
     super.key,
@@ -15,7 +15,7 @@ class FlipTile extends StatefulWidget {
     required this.match,
     required this.delay,
     required this.size,
-    this.onCompleted, // ✅ NEW
+    this.onCompleted,
   });
 
   @override
@@ -41,7 +41,7 @@ class _FlipTileState extends State<FlipTile>
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        widget.onCompleted?.call(); // ✅ Call after flip finishes
+        widget.onCompleted?.call();
       }
     });
 

@@ -7,7 +7,7 @@ void showExitConfirmation(BuildContext context) {
 
   showDialog(
     context: context,
-    barrierDismissible: false, // prevent accidental dismissal
+    barrierDismissible: false,
     builder: (ctx) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: isDark ? Colors.grey[900] : Colors.white,
@@ -26,8 +26,8 @@ void showExitConfirmation(BuildContext context) {
         ),
         TextButton(
           onPressed: () {
-            Navigator.of(ctx).pop(); // close dialog
-            Navigator.of(context).pop(); // exit game
+            Navigator.of(ctx).pop();
+            Navigator.of(context).pop();
           },
           child: const Text("OK"),
         ),

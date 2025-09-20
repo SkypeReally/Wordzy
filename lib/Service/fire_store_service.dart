@@ -7,7 +7,6 @@ class FirestoreService {
 
   String? get _uid => FirebaseAuth.instance.currentUser?.uid;
 
-  /// Uploads all game data (stats, settings, daily word progress) to Firestore
   Future<void> uploadAllGameData({
     required Map<String, dynamic> stats,
     required Map<String, dynamic> settings,
@@ -27,7 +26,6 @@ class FirestoreService {
     await _db.collection('users').doc(_uid).set(data, _mergeOptions);
   }
 
-  /// Loads general stats from Firestore
   Future<Map<String, dynamic>?> loadStats() async {
     if (_uid == null) return null;
 
@@ -39,7 +37,6 @@ class FirestoreService {
     return Map<String, dynamic>.from(data['stats']);
   }
 
-  /// Loads settings from Firestore
   Future<Map<String, dynamic>?> loadSettings() async {
     if (_uid == null) return null;
 
@@ -51,7 +48,6 @@ class FirestoreService {
     return Map<String, dynamic>.from(data['settings']);
   }
 
-  /// Loads daily word played tracker from Firestore
   Future<Map<String, dynamic>> loadDailyWordPlayed() async {
     if (_uid == null) return {};
 
@@ -63,7 +59,6 @@ class FirestoreService {
     return Map<String, dynamic>.from(data['dailyWordPlayed']);
   }
 
-  /// Saves the `dailyWordPlayed` map to Firestore
   Future<void> saveDailyWordPlayed(Map<String, bool> playedMap) async {
     if (_uid == null) return;
 
@@ -72,7 +67,6 @@ class FirestoreService {
     }, _mergeOptions);
   }
 
-  /// Saves the settings map to Firestore
   Future<void> saveSettings(Map<String, dynamic> settings) async {
     if (_uid == null) return;
 

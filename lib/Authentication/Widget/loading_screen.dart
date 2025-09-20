@@ -20,7 +20,7 @@ class LoadingScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.7),
+                  ).colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
                 ),
               ),
             ],

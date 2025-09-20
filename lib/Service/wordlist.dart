@@ -4,16 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class WordListService {
-  static final Map<int, List<String>> _wordLists = {}; // General words
-  static final Map<String, Map<int, List<String>>> _categoryWordLists =
-      {}; // Category → Length → Words
+  static final Map<int, List<String>> _wordLists = {};
+  static final Map<String, Map<int, List<String>>> _categoryWordLists = {};
   static bool _loaded = false;
 
-  /// Loads general and category word lists from separate JSON files
   static Future<void> loadWordList() async {
     if (_loaded) return;
 
-    // 🔤 Load general word list
     final String generalJson = await rootBundle.loadString(
       'assets/word_list.json',
     );
@@ -30,7 +27,6 @@ class WordListService {
       }
     }
 
-    // 🧩 Load category word list
     final String categoryJson = await rootBundle.loadString(
       'assets/category_words.json',
     );
@@ -62,14 +58,12 @@ class WordListService {
     _loaded = true;
   }
 
-  /// 🔤 Returns a random general word of a specific length.
   static Future<String> getRandomWord(int length) async {
     await loadWordList();
     final list = _wordLists[length] ?? [];
     return list.isEmpty ? '' : list[Random().nextInt(list.length)];
   }
 
-  /// 📆 Returns a deterministic daily word of specific length.
   static Future<String> getDailyWord(int length) async {
     await loadWordList();
     final list = _wordLists[length] ?? [];
@@ -95,7 +89,6 @@ class WordListService {
     return word;
   }
 
-  /// 🎲 Returns a random word from a given category of a specific length range.
   static Future<String> getRandomWordFromCategory(
     String category,
     int minLength,
@@ -129,7 +122,6 @@ class WordListService {
     return available.first;
   }
 
-  /// 🎲 Returns a random word from a category of any length.
   static Future<String> getRandomWordFromCategoryAnyLength(
     String category,
   ) async {
@@ -143,17 +135,14 @@ class WordListService {
     return allWords[Random().nextInt(allWords.length)];
   }
 
-  /// 📋 Returns general words of a given length.
   static List<String> getListForLength(int length) {
     return _wordLists[length] ?? [];
   }
 
-  /// 🧠 Returns all available categories.
   static List<String> getAvailableCategories() {
     return _categoryWordLists.keys.toList()..sort();
   }
 
-  /// 📚 Returns all words in a category regardless of length.
   static List<String> getWordsFromCategory(String category) {
     return _categoryWordLists[category.toLowerCase()]?.values
             .expand((list) => list)
@@ -161,12 +150,10 @@ class WordListService {
         [];
   }
 
-  /// 📏 Returns available word lengths in a category.
   static List<int> getAvailableLengthsForCategory(String category) {
     return _categoryWordLists[category.toLowerCase()]?.keys.toList() ?? [];
   }
 
-  /// 📐 Returns words of a specific length in a category.
   static List<String> getCategoryWords(String category, int length) {
     return _categoryWordLists[category.toLowerCase()]?[length] ?? [];
   }

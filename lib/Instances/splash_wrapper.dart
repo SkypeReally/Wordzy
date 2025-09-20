@@ -28,17 +28,12 @@ class _SplashWrapperState extends State<SplashWrapper> {
   }
 
   Future<void> _initialize() async {
-    if (_isLoading) return; // prevent double call
+    if (_isLoading) return;
     _isLoading = true;
 
     try {
-      // Load settings (which internally loads from local + cloud + starts listener)
       await widget.settingsProvider.loadSettings();
 
-      // Wait until settingsProvider confirms loaded (optional, since loadSettings awaits cloud)
-      // You could also listen to settingsProvider.isLoaded if needed.
-
-      // Load other game data after settings ready
       await WordListService.loadWordList();
       await DailyWordService.loadDailyWords();
 
@@ -47,7 +42,6 @@ class _SplashWrapperState extends State<SplashWrapper> {
       });
     } catch (e, st) {
       debugPrint('❌ SplashWrapper init error: $e\n$st');
-      // Optionally handle error UI or retry logic here
     }
   }
 

@@ -11,8 +11,8 @@ class GuessRowWidget extends StatelessWidget {
   final double spacing;
   final bool Function() isTileAnimationEnabled;
   final Color Function(LetterMatch match) getColorFromMatch;
-  final VoidCallback? onFlipComplete; // ✅ Callback for last tile in last row
-  final bool isLastGuessRow; // ✅ NEW flag
+  final VoidCallback? onFlipComplete;
+  final bool isLastGuessRow;
 
   const GuessRowWidget({
     super.key,
@@ -24,7 +24,7 @@ class GuessRowWidget extends StatelessWidget {
     required this.isTileAnimationEnabled,
     required this.getColorFromMatch,
     this.onFlipComplete,
-    this.isLastGuessRow = false, // ✅ default false
+    this.isLastGuessRow = false,
   });
 
   @override
@@ -57,8 +57,6 @@ class GuessRowWidget extends StatelessWidget {
                     onCompleted: isLastTile && isLastGuessRow
                         ? onFlipComplete
                         : null,
-
-                    // ✅ Trigger only on final tile of final row
                   )
                 : Container(
                     decoration: BoxDecoration(

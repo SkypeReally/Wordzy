@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart'; // Add this in pubspec.yaml
-
+import 'package:animations/animations.dart';
 import 'package:gmae_wordle/Instances/delayed_slide.dart';
 
-/// Slide route transition
 Route createSlideRoute(
   Widget page, {
   bool useDelay = false,
@@ -24,7 +22,6 @@ Route createSlideRoute(
   );
 }
 
-/// Fade route transition
 Route createFadeRoute(
   Widget page, {
   Duration duration = const Duration(milliseconds: 300),
@@ -37,7 +34,6 @@ Route createFadeRoute(
   );
 }
 
-/// Bottom navigation transition builder using FadeThrough
 Widget buildTabTransition({
   required Widget child,
   required Animation<double> animation,
@@ -50,7 +46,6 @@ Widget buildTabTransition({
   );
 }
 
-/// Widget wrapper to apply bottom nav transition
 class AnimatedTabSwitcher extends StatelessWidget {
   final Widget child;
   final int currentIndex;
@@ -65,14 +60,13 @@ class AnimatedTabSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine the direction of the slide
     final bool slideFromRight = currentIndex > previousIndex;
 
     return PageTransitionSwitcher(
       duration: const Duration(milliseconds: 300),
       reverse: !slideFromRight,
       transitionBuilder: (child, animation, secondaryAnimation) {
-        const offset = Offset(1.0, 0.0); // from right
+        const offset = Offset(1.0, 0.0);
         final tween = Tween<Offset>(
           begin: slideFromRight ? offset : -offset,
           end: Offset.zero,

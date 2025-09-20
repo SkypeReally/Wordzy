@@ -28,7 +28,6 @@ class GameBoard extends StatelessWidget {
       builder: (context, constraints) {
         return Column(
           children: [
-            // 🟩 Game Grid Section
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
@@ -45,7 +44,7 @@ class GameBoard extends StatelessWidget {
                       wordLength: wordLength,
                       isTileAnimationEnabled: () => isTileAnimationEnabled,
                       getColorFromMatch: getColorFromMatch,
-                      controller: controller, // ✅ Needed for hints
+                      controller: controller,
                     ),
                   ),
                 ),
@@ -54,7 +53,6 @@ class GameBoard extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            // ⌨️ Keyboard
             SafeArea(
               top: false,
               child: Padding(

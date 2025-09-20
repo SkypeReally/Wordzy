@@ -37,7 +37,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) => setState(() => _selectedIndex = index),
-        physics: const BouncingScrollPhysics(), // Optional: smoother swiping
+        physics: const BouncingScrollPhysics(),
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(

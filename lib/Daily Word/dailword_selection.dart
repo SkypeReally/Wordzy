@@ -102,7 +102,6 @@ class _DailyWordLengthSelectionPageState
                     arguments: length,
                   );
 
-                  // 🔁 Refresh outcome
                   await _loadStatus();
                 }
               },

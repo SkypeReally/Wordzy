@@ -17,7 +17,7 @@ class DailyWordLengthSelectorPage extends StatefulWidget {
 class _DailyWordLengthSelectorPageState
     extends State<DailyWordLengthSelectorPage> {
   final List<int> wordLengths = [3, 4, 5, 6, 7, 8];
-  Map<int, String?> outcomeMap = {}; // 'win', 'loss', or null
+  Map<int, String?> outcomeMap = {};
   bool isLoading = true;
 
   @override
@@ -29,9 +29,7 @@ class _DailyWordLengthSelectorPageState
   Future<void> _checkOutcomeStatus() async {
     final Map<int, String?> result = {};
     for (final length in wordLengths) {
-      result[length] = await DailyWordPlayedTracker.getOutcomeToday(
-        length,
-      ); // ✅ use outcome
+      result[length] = await DailyWordPlayedTracker.getOutcomeToday(length);
     }
     setState(() {
       outcomeMap = result;
@@ -65,7 +63,7 @@ class _DailyWordLengthSelectorPageState
       ),
     );
 
-    await _checkOutcomeStatus(); // 🔄 refresh after game
+    await _checkOutcomeStatus();
   }
 
   @override
@@ -83,7 +81,7 @@ class _DailyWordLengthSelectorPageState
         padding: const EdgeInsets.all(24.0),
         child: DailyWordGrid(
           wordLengths: wordLengths,
-          outcomeMap: outcomeMap, // ✅ pass new map
+          outcomeMap: outcomeMap,
           onTileTap: _handleTileTap,
         ),
       ),

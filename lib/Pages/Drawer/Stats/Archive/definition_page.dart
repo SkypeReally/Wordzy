@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 class DefinitionPage extends StatelessWidget {
   final String word;
-  final String? definition; // Can be null if not available
-
+  final String? definition;
   const DefinitionPage({super.key, required this.word, this.definition});
 
   @override

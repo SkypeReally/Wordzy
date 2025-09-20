@@ -157,7 +157,7 @@ class _PlayGamePageState extends State<PlayGamePage> {
       transitionDuration: const Duration(milliseconds: 500),
       pageBuilder: (_, __, ___) {
         return Scaffold(
-          backgroundColor: Colors.black.withOpacity(0.7),
+          backgroundColor: Colors.black.withAlpha((0.7 * 255).toInt()),
           body: Center(
             child: TweenAnimationBuilder(
               tween: Tween<double>(begin: 0.8, end: 1.0),
@@ -170,11 +170,11 @@ class _PlayGamePageState extends State<PlayGamePage> {
                     padding: const EdgeInsets.all(24),
                     margin: const EdgeInsets.symmetric(horizontal: 32),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withAlpha((0.2 * 255).toInt()),
                           blurRadius: 12,
                           offset: const Offset(0, 6),
                         ),

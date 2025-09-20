@@ -15,9 +15,7 @@ class DailyCountdownCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = theme
-        .colorScheme
-        .primary; // You can also use `tertiary` or `secondary` if preferred
+    final color = theme.colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.only(top: 16),

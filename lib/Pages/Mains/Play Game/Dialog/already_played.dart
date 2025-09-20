@@ -16,8 +16,8 @@ void showAlreadyPlayedDialog(BuildContext context) {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.of(ctx).pop(); // Close dialog
-            Navigator.of(context).pop(); // Navigate back to menu
+            Navigator.of(ctx).pop();
+            Navigator.of(context).pop();
           },
           child: const Text(
             "OK",

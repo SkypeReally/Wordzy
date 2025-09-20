@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-
 import 'package:gmae_wordle/Authentication/Pages/Register%20Page/Dialog/error_message.dart';
 import 'package:gmae_wordle/Authentication/Pages/Register%20Page/Widget/password_field.dart';
 import 'package:gmae_wordle/Authentication/Pages/Register%20Page/Button/register_button.dart';
 import 'package:gmae_wordle/Authentication/Pages/Register%20Page/Widget/terms_checkbox.dart';
 import 'package:gmae_wordle/Authentication/Pages/Register%20Page/Widget/login_link.dart';
-
 import '../../../../Provider/setting_provider.dart';
 
 class RegisterForm extends StatefulWidget {

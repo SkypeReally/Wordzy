@@ -23,7 +23,7 @@ class LoginLink extends StatelessWidget {
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: Colors.blue,
                 fontWeight: FontWeight.bold,
-                decoration: TextDecoration.none, // explicitly remove underline
+                decoration: TextDecoration.none,
               ),
               recognizer: TapGestureRecognizer()..onTap = onTap,
             ),

@@ -12,8 +12,7 @@ class GuessDistributionChart extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double maxBarWidth =
-            constraints.maxWidth - 40; // 20 for label + padding
+        final double maxBarWidth = constraints.maxWidth - 40;
 
         return Column(
           children: List.generate(distribution.length, (i) {

@@ -138,13 +138,12 @@ class CategoriesPage extends StatelessWidget {
     );
   }
 
-  /// Returns local asset path of badge based on progress
   String _badgeIconPathFor(double progress) {
     if (progress >= 1.0) return 'assets/pics/badges/diamond_badge.png';
     if (progress >= 0.75) return 'assets/pics/badges/gold_badge.png';
     if (progress >= 0.5) return 'assets/pics/badges/silver_badge.png';
     if (progress > 0.0) return 'assets/pics/badges/bronze_badge.png';
-    return 'assets/pics/badges/bronze_badge.png'; // default fallback
+    return 'assets/pics/badges/bronze_badge.png';
   }
 
   void _showError(BuildContext context, String message) {

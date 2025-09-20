@@ -37,7 +37,6 @@ class _AnimatedTileState extends State<AnimatedTile>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
     );
 
-    // Delayed flip trigger
     Future.delayed(widget.delay, () {
       if (mounted) _controller.forward();
     });
@@ -57,7 +56,7 @@ class _AnimatedTileState extends State<AnimatedTile>
         final isBack = _flipAnimation.value >= pi / 2;
 
         final transform = Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // perspective
+          ..setEntry(3, 2, 0.001)
           ..rotateX(_flipAnimation.value);
 
         return Transform(
@@ -73,7 +72,7 @@ class _AnimatedTileState extends State<AnimatedTile>
     return _tileContainer(
       color: Colors.white,
       borderColor: Colors.grey,
-      child: const SizedBox.shrink(), // Empty front side
+      child: const SizedBox.shrink(),
     );
   }
 

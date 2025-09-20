@@ -12,7 +12,6 @@ class HintsProvider extends ChangeNotifier {
   bool get isHintsEnabled => _isHintsEnabled;
   bool get hasUsedHint => _hasUsedHint;
 
-  /// Call this once on startup
   Future<void> loadHintsSetting() async {
     final prefs = await SharedPreferences.getInstance();
     _isHintsEnabled = prefs.getBool(_prefsKey) ?? false;
@@ -28,7 +27,7 @@ class HintsProvider extends ChangeNotifier {
         final cloudValue = doc.data()?['settings']?['hintsEnabled'];
         if (cloudValue != null && cloudValue is bool) {
           _isHintsEnabled = cloudValue;
-          await prefs.setBool(_prefsKey, _isHintsEnabled); // Sync local
+          await prefs.setBool(_prefsKey, _isHintsEnabled);
         }
       } catch (e) {
         debugPrint("Error loading hints from Firestore: $e");
