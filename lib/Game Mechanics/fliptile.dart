@@ -61,7 +61,7 @@ class _FlipTileState extends State<FlipTile>
       case LetterMatch.correct:
         return Colors.green;
       case LetterMatch.present:
-        return Colors.amber.shade700;
+        return const Color.fromRGBO(255, 160, 0, 1);
       case LetterMatch.absent:
         return const Color.fromARGB(255, 39, 87, 160);
       case LetterMatch.none:

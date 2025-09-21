@@ -129,11 +129,13 @@ class WordleKeyboard extends StatelessWidget {
       LetterMatch.correct =>
         isDark ? const Color(0xFF538D4E) : const Color(0xFF6AAA64),
       LetterMatch.present =>
-        isDark ? const Color(0xFFB59F3B) : const Color(0xFFC9B458),
+        isDark
+            ? const Color.fromRGBO(255, 160, 0, 1)
+            : const Color.fromRGBO(255, 160, 0, 1),
       LetterMatch.absent =>
         isDark
             ? const Color.fromARGB(255, 39, 87, 160)
-            : const Color(0xFF787C7E),
+            : const Color.fromARGB(255, 39, 87, 160),
       _ => isDark ? const Color(0xFF818384) : const Color(0xFFD3D6DA),
     };
   }

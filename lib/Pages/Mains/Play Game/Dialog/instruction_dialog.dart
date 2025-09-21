@@ -8,7 +8,7 @@ void showInstructionsDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
-      backgroundColor: theme.dialogBackgroundColor,
+      backgroundColor: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Text(
         'How to Play',
@@ -41,7 +41,7 @@ void showInstructionsDialog(BuildContext context) {
             ),
             _buildLegendTile(
               color: Colors.yellow,
-              label: 'Correct letter in the wrong position',
+              label: 'Letter exists but in wrong position',
             ),
             _buildLegendTile(
               color: const Color.fromARGB(255, 51, 136, 233),

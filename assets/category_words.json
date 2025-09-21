@@ -1,18 +1,28 @@
- {
+{
   "Animals": {
-       "3": ["cat", "dog", "ape", "yak", "pig", "cow", "bat", "boa", "eel", "fox", "rat"],
+    "3": [
+      "cat",
+      "dog",
+      "ape",
+      "yak",
+      "pig",
+      "cow",
+      "bat",
+      "boa",
+      "eel",
+      "fox",
+      "rat"
+    ],
     "4": ["Lion", "Bear", "Wolf"],
     "5": ["Horse", "Zebra", "Sheep"],
     "6": ["Rabbit", "Donkey", "Jaguar"],
     "7": ["Giraffe", "Ocelots", "Buffalo"],
     "8": ["Elephant", "Cheetahs", "Mandrill"]
-},
+  },
 
   "Fruits": {
     "3": ["Fig", "Nut", "Plum"]
-   
   },
-
 
   "Birds": {
     "3": ["Emu", "Owl", "Jay"],
@@ -21,131 +31,169 @@
     "6": ["Pigeon", "Magpie", "Buzzer"],
     "7": ["Warbler", "Ospreyz", "Wagtail"],
     "8": ["Flamingo", "Kingfish", "Nuthatch"]
-    },
+  },
 
-    "Countries": {
+  "Countries": {
     "3": ["Chad", "Lao", "Mali", "Togo"],
     "4": ["Peru", "Iran", "Iraq", "Oman", "Cuba", "Fiji"],
-    "5": ["India", "Chile", "Spain", "Nepal", "Kenya", "Qatar", "Italy", "Gabon", "Haiti"],
-    "6": ["France", "Brazil", "Norway", "Cyprus", "Bhutan", "Greece", "Sweden", "Brunei", "Latvia"],
-    "7": ["Ukraine", "Germany", "Austria", "Albania", "Morocco", "Lesotho", "Finland", "Armenia", "Belgium"],
-    "8": ["Portugal", "Thailand", "Namibia", "Colombia", "Pakistan", "Mongolia", "Honduras"]
-},
-"Insects": {
+    "5": [
+      "India",
+      "Chile",
+      "Spain",
+      "Nepal",
+      "Kenya",
+      "Qatar",
+      "Italy",
+      "Gabon",
+      "Haiti"
+    ],
+    "6": [
+      "France",
+      "Brazil",
+      "Norway",
+      "Cyprus",
+      "Bhutan",
+      "Greece",
+      "Sweden",
+      "Brunei",
+      "Latvia"
+    ],
+    "7": [
+      "Ukraine",
+      "Germany",
+      "Austria",
+      "Albania",
+      "Morocco",
+      "Lesotho",
+      "Finland",
+      "Armenia",
+      "Belgium"
+    ],
+    "8": [
+      "Portugal",
+      "Thailand",
+      "Namibia",
+      "Colombia",
+      "Pakistan",
+      "Mongolia",
+      "Honduras"
+    ]
+  },
+  "Insects": {
     "3": ["Ant", "Fly", "Bee"],
     "4": ["Wasp", "Gnat", "Moth"],
     "5": ["Beetle", "Louse", "Buggy"],
     "6": ["Weevil", "Cicada", "Dragon"],
     "7": ["Katydid", "Hornets", "Firefly"],
-    "8": ["Mosquito", "Grasshop"] 
-},
+    "8": ["Mosquito", "Grasshop"]
+  },
 
-"Superheroes": {
+  "Superheroes": {
     "3": ["Hulk"],
     "4": ["Thor", "Zane"],
     "5": ["Flash", "Blade", "Raven"],
     "6": ["Batman", "Falcon", "Vision"],
     "7": ["Ironman", "Antman", "Shazam"],
     "8": ["Spiderman", "Aquaman", "Deadpool"]
-},
-"Cartoons": {
+  },
+  "Cartoons": {
     "3": ["Tom", "Ben"],
     "4": ["Bart", "Dora", "Milo"],
     "5": ["Naruto", "Shrek", "Elsa"],
     "6": ["Simpson", "Dexter", "Bambi"],
     "7": ["ScoobyD", "Pikachu", "Garfield"],
     "8": ["SpongeBo", "BuzzLite", "DonaldD"]
-},
-"Colors": {
+  },
+  "Colors": {
     "3": ["Red", "Tan"],
     "4": ["Blue", "Gold", "Cyan", "Gray", "Pink"],
     "5": ["Green", "Black", "White", "Beige", "Coral"],
     "6": ["Orange", "Yellow", "Indigo", "Silver", "Maroon"],
     "7": ["Violet", "Crimson", "Burgund"],
     "8": ["Magenta", "Scarlet"]
-},
+  },
 
-"Space": {
+  "Space": {
     "3": ["Sun"],
     "4": ["Moon", "Star"],
     "5": ["Comet", "Black", "Orbit"],
     "6": ["Planet", "Meteor", "Aurora", "Galaxy"],
     "7": ["Gravity", "Eclipse", "Asteroid"],
     "8": ["Nebulae", "Supernova", "Darkness"]
-},
-"Sports": {
+  },
+  "Sports": {
     "3": ["Gym", "Bow"],
     "4": ["Golf", "Judo", "Polo"],
     "5": ["Chess", "Tennis", "Rugby"],
     "6": ["Soccer", "Boxing", "Cricket", "Hockey"],
     "7": ["Cycling", "Skating", "Fencing"],
     "8": ["Baseball", "Handball"]
-},
-"Festivals": {
+  },
+  "Festivals": {
     "3": ["Holi", "Eid"],
     "4": ["Lohri", "Purim"],
     "5": ["Diwali", "Baisak", "Nowruz"],
     "6": ["DurgaP", "Hanukk", "Ramzan"],
     "7": ["Navarat", "Oktober", "Kwanzaa"],
     "8": ["Christmas", "Carnival", "Thanksgi"]
-},
-"Languages": {
+  },
+  "Languages": {
     "3": ["Udi", "Ewe", "Zul"],
     "4": ["Hind", "Twi", "Igbo"],
     "5": ["Hindi", "Tamil", "Malay", "Greek"],
     "6": ["French", "German", "Telugu", "Arabic"],
     "7": ["English", "Russian", "Ukrainy", "Kannada"],
     "8": ["Japanese", "Mandarin", "Swahili"]
-},
-"Bugs": {
+  },
+  "Bugs": {
     "3": ["Ant", "Fly", "Bee"],
     "4": ["Wasp", "Mite", "Gnat"],
     "5": ["Buggy", "Louse", "Grubs"],
     "6": ["Weevil", "Cicada", "Beetle"],
     "7": ["Katydid", "Firefly", "Hornets"],
     "8": ["Mosquito", "Stickbug"]
-},
-"Jobs": {
+  },
+  "Jobs": {
     "3": ["CEO", "Vet", "Cop"],
     "4": ["Chef", "Nurse", "Clerk"],
     "5": ["Pilot", "Judge", "Artist", "Miner"],
     "6": ["Doctor", "Farmer", "Lawyer", "Baker"],
     "7": ["Teacher", "Janitor", "Manager"],
     "8": ["Engineer", "Plumber", "Soldier"]
-},
-"Flowers": {
+  },
+  "Flowers": {
     "3": ["Iris"],
     "4": ["Rose", "Lily", "Pans"],
     "5": ["Tulip", "Daisy", "Lotus"],
     "6": ["Orchid", "Garden", "Zinnia"],
     "7": ["Sunflow", "Peonyes", "Petunia"],
     "8": ["Carnatio", "Bluebell", "Chrysant"]
-},
+  },
 
-"Applications": {
+  "Applications": {
     "3": ["VLC", "MPC"],
     "4": ["Zoom", "GIMP", "Xodo", "Kden"],
     "5": ["Slack", "Notep", "Trello", "Brave"],
     "6": ["Chrome", "Gmail", "Spotify", "Audacy"],
     "7": ["Firefox", "Discord", "Skypeee"],
     "8": ["WhatsApp", "Instagram", "Evernote"]
-},
+  },
 
-"Currency": {
+  "Currency": {
     "3": ["Yen", "Won"],
     "4": ["Euro", "Rial", "Lira"],
     "5": ["Rupee", "Dirham", "Krona"],
     "6": ["Dollar", "Takaaa", "Pounda"],
     "7": ["Rubles", "Francs", "Peseta"],
     "8": ["Florints", "Kipbucks"]
-},
+  },
 
-"Tools": {
+  "Tools": {
     "3": ["Axe", "Saw", "Hoe"],
     "4": ["Wren", "Dril", "Pick"],
     "5": ["Hammer", "Chisel", "Spade"],
     "6": ["Wrench", "Cutter", "Plierz", "Ladder"],
-    "7": [ "Jackset"],
+    "7": ["Jackset"],
     "8": ["Chainsaw", "Handdril"]
-}
+  }
 }
