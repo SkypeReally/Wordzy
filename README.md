@@ -12,10 +12,10 @@ This project was developed as a part of our academic curriculum to explore mobil
 
 ## 👨‍💻 Team Members
 
-- **Abhiram**
-- **Anandu**
-- **Sunoj**
-- **Yadhu**
+- **Abhiram P Saji**
+- **Anandu A Nair**
+- **Sunoj Sunilkumar**
+- **Yadhukrishnan S B**
 
 ---
 
@@ -34,12 +34,25 @@ This project was developed as a part of our academic curriculum to explore mobil
 
 ## 📱 Built With
 
-- Flutter
-- Dart
+- Flutter (Framework of Dart)
 - Firebase (Firestore & Auth)
+
+---
+
+## 😉 Future Enhancement
+
+- Multiplayer
+- Word definition
+- More... more categories
+- Leaderboard
+- Multiple modes
+- Of course more words
+- And.... more and more features...😊
 
 ## 📂 Getting Started
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/gmae_wordle.git
+```
