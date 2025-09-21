@@ -58,7 +58,8 @@ class MenuDrawer extends StatelessWidget {
                         child: Text(
                           "Hello $name!",
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontFamily: 'bomberMan',
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -165,7 +166,14 @@ class MenuDrawer extends StatelessWidget {
   }) {
     return ListTile(
       leading: Icon(icon, color: iconColor),
-      title: Text(label, style: TextStyle(color: textColor)),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
       onTap: onTap,
     );
   }

@@ -10,7 +10,14 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       drawer: const MenuDrawer(),
       appBar: AppBar(
-        title: const Text("Wordzy"),
+        title: const Text(
+          "Wordzy",
+          style: TextStyle(
+            fontFamily: 'ModernFeeling',
+            fontWeight: FontWeight.w900,
+            fontSize: 34,
+          ),
+        ),
         centerTitle: true,
         leading: Builder(
           builder: (context) => IconButton(

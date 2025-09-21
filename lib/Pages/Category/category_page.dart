@@ -13,7 +13,17 @@ class CategoriesPage extends StatelessWidget {
     final categories = WordListService.getAvailableCategories();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text(
+          'Categories',
+          style: TextStyle(
+            fontFamily: 'ModernFeeling',
+            fontWeight: FontWeight.w900,
+            fontSize: 30,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: categories.isEmpty
           ? const Center(child: Text("No categories found."))
           : GridView.builder(

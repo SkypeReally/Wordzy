@@ -74,11 +74,28 @@ flutter:
     - assets/pics/google_logo.png
 
     # Badges Icons
-
     - assets/pics/badges/bronze_badge.png
     - assets/pics/badges/silver_badge.png
     - assets/pics/badges/gold_badge.png
     - assets/pics/badges/diamond_badge.png
+
+  fonts:
+    - family: ModernFeeling
+      fonts:
+        - asset: assets/fonts/mondayFeelings.ttf
+    - family: BomberMan
+      fonts:
+        - asset: assets/fonts/bomberMan.otf
+    - family: PulpFiction
+      fonts:
+        - asset: assets/fonts/pulpFiction.ttf
+    - family: WildWords
+      fonts:
+        - asset: assets/fonts/wildWordsRoman.ttf
+        - asset: assets/fonts/newWildWords.ttf
+    - family: TallTales
+      fonts:
+        - asset: assets/fonts/tallTales.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

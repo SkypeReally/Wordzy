@@ -46,7 +46,17 @@ class _DailyWordPageState extends State<DailyWordPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Daily Word"), centerTitle: true),
+      appBar: AppBar(
+        title: const Text(
+          "Daily Word",
+          style: TextStyle(
+            fontFamily: 'ModernFeeling',
+            fontWeight: FontWeight.w900,
+            fontSize: 30,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Center(

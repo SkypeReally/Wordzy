@@ -20,13 +20,17 @@ class HintsPage extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (_) => AlertDialog(
-                  title: const Text('Hint System'),
+                  title: const Text(
+                    'Hint System',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
                   content: const Text(
                     'You can use one of three hint types:\n\n'
                     '• Green: Reveals correct letter in correct position.\n'
                     '• Yellow: Correct letter, wrong spot.\n'
                     '• Grey: Marks unused letter.\n\n'
                     'Only available in normal mode.',
+                    style: TextStyle(fontFamily: 'PulpFiction'),
                   ),
                   actions: [
                     TextButton(
@@ -51,7 +55,10 @@ class HintsPage extends StatelessWidget {
               onChanged: settings.hardMode
                   ? null
                   : (enabled) => settings.setHintsEnabled(enabled),
-              title: const Text("Enable Hints"),
+              title: const Text(
+                "Enable Hints",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
               subtitle: Text(
                 settings.hardMode
                     ? "Hints are disabled while Hard Mode is active."
@@ -67,17 +74,26 @@ class HintsPage extends StatelessWidget {
             const Divider(),
             const ListTile(
               leading: Icon(Icons.check_circle, color: Colors.green),
-              title: Text("Green Hint"),
+              title: Text(
+                "Green Hint",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: Text("Reveals a correct letter in the correct spot."),
             ),
             const ListTile(
               leading: Icon(Icons.warning_amber, color: Colors.amber),
-              title: Text("Yellow Hint"),
+              title: Text(
+                "Yellow Hint",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: Text("Reveals a correct letter in the wrong spot."),
             ),
             const ListTile(
               leading: Icon(Icons.block, color: Colors.grey),
-              title: Text("Grey Hint"),
+              title: Text(
+                "Grey Hint",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               subtitle: Text("Marks a letter not in the word."),
             ),
             const SizedBox(height: 24),
