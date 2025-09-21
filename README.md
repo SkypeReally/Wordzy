@@ -54,5 +54,5 @@ This project was developed as a part of our academic curriculum to explore mobil
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/SkypeReally/gmae_wordle.git
+git clone https://github.com/SkypeReally/Wordzy.git
 ```
